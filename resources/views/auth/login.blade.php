@@ -47,7 +47,7 @@
                         required
                         autofocus
                         class="w-full pl-12 pr-5 py-4 bg-gray-100/50 border border-transparent rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#1e481e]/20 focus:border-[#1e481e] focus:bg-white transition-all text-sm font-bold text-gray-800 placeholder-gray-400 shadow-inner"
-                        placeholder="nama.user@meditrack.id"
+                        placeholder="Masukkan Email"
                     >
                 </div>
                 @error('email')

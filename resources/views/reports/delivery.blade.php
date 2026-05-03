@@ -5,15 +5,15 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-8 animate-fade-in pb-12">
-    <!-- Header -->
+    <!-- Header with Actions (Visible on Screen) -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
         <div>
-            <h2 class="text-3xl font-black text-tni-900 tracking-tight">Laporan Detail Pengantaran</h2>
+            <h2 class="text-3xl font-black text-tni-900 tracking-tight">Detail Pengantaran Meditrack</h2>
             <p class="text-gray-500 font-medium">Periode: {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         </div>
         <div class="flex gap-3">
             <button onclick="window.print()" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-lg font-bold flex items-center">
-                <i class="fas fa-print mr-2"></i> Cetak
+                <i class="fas fa-print mr-2"></i> Cetak Laporan
             </button>
             <a href="{{ route('reports.index') }}" class="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl hover:bg-gray-200 transition font-bold">
                 Kembali
@@ -21,8 +21,36 @@
         </div>
     </div>
 
+    <!-- Formal Letterhead (Visible ONLY on print) -->
+    <div class="hidden print:block mb-12 border-b-4 border-double border-black pb-8">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <div class="w-24 h-24 bg-tni-800 rounded-2xl flex items-center justify-center text-gold-400 text-5xl shadow-lg">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black uppercase tracking-tight leading-none mb-1">Tentara Nasional Indonesia Angkatan Darat</h1>
+                    <h2 class="text-xl font-bold uppercase tracking-tight text-gray-800 leading-none mb-1">Kesehatan Daerah Militer Iskandar Muda</h2>
+                    <h3 class="text-lg font-bold uppercase text-tni-900 leading-none">Rumkit TK III IM 07.01 Lhokseumawe</h3>
+                    <p class="text-sm text-gray-500 mt-3 font-medium">Jl. Sultan Iskandar Muda No. 1, Kec. Banda Sakti, Kota Lhokseumawe, Aceh 24311</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="px-5 py-3 bg-gray-100 rounded-xl mb-3 border border-gray-200">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Dokumen Logistik</p>
+                    <p class="text-base font-black text-tni-900">MT/DLV/{{ date('Ymd') }}</p>
+                </div>
+                <p class="text-xs font-bold text-gray-400">Dicetak: {{ now()->format('d/m/Y H:i') }} WIB</p>
+            </div>
+        </div>
+        <div class="text-center mt-12">
+            <h2 class="text-2xl font-black uppercase border-b-2 border-black inline-block pb-1 mb-2">Laporan Detail Pengantaran Obat</h2>
+            <p class="text-sm font-bold text-gray-600">Periode Data: {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
+        </div>
+    </div>
+
     <!-- Quick Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 print:grid-cols-4 print:gap-2">
         <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
             <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Tugas</p>
             <p class="text-2xl font-black text-tni-900">{{ $deliveryStats['total'] }}</p>
@@ -103,5 +131,32 @@
             </table>
         </div>
     </div>
+    <!-- Print Footer / Signatures -->
+    <div class="hidden print:grid grid-cols-2 gap-20 mt-20">
+        <div class="text-center">
+            <p class="text-sm font-bold mb-20 text-gray-800">Mengetahui,<br>Kepala Instalasi Farmasi</p>
+            <div class="border-b border-black w-48 mx-auto mb-1"></div>
+            <p class="text-xs font-black uppercase">Pangkat / NRP</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm font-bold mb-20 text-gray-800">Lhokseumawe, {{ now()->format('d F Y') }}<br>Petugas Administrasi</p>
+            <div class="border-b border-black w-48 mx-auto mb-1"></div>
+            <p class="text-xs font-black uppercase">{{ auth()->user()->name }}</p>
+        </div>
+    </div>
 </div>
+
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; margin: 0; padding: 20px; }
+        .max-w-6xl { max-width: 100% !important; margin: 0 !important; }
+        .bg-white { border: 1px solid #ddd !important; box-shadow: none !important; }
+        .rounded-3xl, .rounded-[2.5rem], .rounded-2xl { border-radius: 8px !important; }
+        .shadow-xl, .shadow-2xl, .shadow-sm { box-shadow: none !important; }
+        table { border-collapse: collapse !important; width: 100% !important; }
+        th, td { border: 1px solid #ddd !important; padding: 8px !important; }
+        .animate-pulse { animation: none !important; }
+    }
+</style>
 @endsection

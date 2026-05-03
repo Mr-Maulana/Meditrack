@@ -111,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/users', [ReportController::class, 'userReport'])->name('users');
             Route::get('/deliveries', [ReportController::class, 'deliveryReport'])->name('deliveries');
             Route::get('/prescriptions', [ReportController::class, 'prescriptionReport'])->name('prescriptions');
-            Route::post('/generate', [ReportController::class, 'generateReport'])->name('generate');
+            Route::match(['get', 'post'], '/generate', [ReportController::class, 'generateReport'])->name('generate');
             Route::post('/export', [ReportController::class, 'exportReport'])->name('export');
             Route::get('/quick/{type}/{range}', [ReportController::class, 'quickReport'])->name('quick');
         });
@@ -140,6 +140,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/deliveries/{delivery}/details', [MapController::class, 'getDeliveryDetails']);
         Route::post('/deliveries/{delivery}/arrived', [MapController::class, 'markAsArrived']);
         Route::post('/deliveries/{delivery}/status', [MapController::class, 'updateDeliveryStatus']);
+        Route::get('/deliveries/{delivery}/tracking-data', [\App\Http\Controllers\TrackingController::class, 'getTrackingData'])->name('deliveries.tracking-data');
     });
 
     // Notifications

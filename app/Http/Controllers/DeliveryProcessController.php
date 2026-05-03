@@ -415,7 +415,10 @@ class DeliveryProcessController extends Controller
             $assessment = DeliveryAssessment::with('delivery')->findOrFail($assessmentId);
             
             if ($assessment->courier_id !== Auth::id()) {
-                abort(403, 'Anda tidak memiliki akses ke pengantaran ini.');
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Unauthorized'
+                ], 403);
             }
 
             $assessment->delivery->update(['status' => 'pending']);
@@ -426,9 +429,10 @@ class DeliveryProcessController extends Controller
                 'user_id' => Auth::id()
             ]);
 
-            return redirect()
-                ->route('delivery-process.index')
-                ->with('success', 'Pengantaran berhasil dibatalkan.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengantaran berhasil dibatalkan.'
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Error cancelling delivery', [
@@ -436,9 +440,10 @@ class DeliveryProcessController extends Controller
                 'error' => $e->getMessage()
             ]);
 
-            return redirect()
-                ->route('delivery-process.index')
-                ->with('error', 'Terjadi kesalahan saat membatalkan pengantaran.');
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat membatalkan pengantaran.'
+            ], 500);
         }
     }
 

@@ -1,244 +1,253 @@
 @extends('layouts.app')
 
-@section('title', 'Rute Pengantaran')
-@section('page-title', 'Rute Pengantaran')
+@section('title', 'Navigasi Pengantaran')
+@section('page-title', 'Navigasi Real-Time')
 
 @section('styles')
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     #routeMap {
-        height: 500px;
+        height: calc(100vh - 12rem);
         width: 100%;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-radius: 2.5rem;
+        z-index: 10;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     }
     
-    .route-info-card {
-        background: white;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .countdown-timer {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #3b82f6;
-        text-align: center;
-    }
-    
-    .navigation-controls {
+    .floating-stats {
         position: absolute;
-        bottom: 1rem;
-        left: 50%;
-        transform: translateX(-50%);
+        top: 1.5rem;
+        left: 1.5rem;
+        right: 1.5rem;
         z-index: 1000;
-        background: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         display: flex;
         gap: 1rem;
+        pointer-events: none;
     }
     
+    .stat-pill {
+        pointer-events: auto;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 0.75rem 1.5rem;
+        border-radius: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    }
+
+    .bottom-controls {
+        position: absolute;
+        bottom: 2rem;
+        left: 1.5rem;
+        right: 1.5rem;
+        z-index: 1000;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        pointer-events: none;
+    }
+
+    .action-group {
+        pointer-events: auto;
+        background: rgba(37, 67, 40, 0.9); /* tni-800 with opacity */
+        backdrop-filter: blur(16px);
+        padding: 1rem;
+        border-radius: 2rem;
+        display: flex;
+        gap: 0.75rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     .destination-marker {
         background-color: #ef4444;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        border: 3px solid white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+        width: 24px;
+        height: 24px;
+        border: 4px solid white;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
     }
     
     .current-marker {
         background-color: #3b82f6;
         border-radius: 50%;
-        width: 16px;
-        height: 16px;
-        border: 3px solid white;
-        box-shadow: 0 0 10px rgba(0,0,0,0.3);
-        animation: pulse 2s infinite;
+        width: 20px;
+        height: 20px;
+        border: 4px solid white;
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
     }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
+
+    .leaflet-control-zoom {
+        border: none !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .leaflet-control-zoom a {
+        background: white !important;
+        color: #254328 !important;
+        border-radius: 12px !important;
+        margin-bottom: 5px !important;
     }
 </style>
 @endsection
 
 @section('content')
-<div class="max-w-6xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0 mb-6">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Rute Pengantaran</h2>
-            <p class="text-gray-600">Menuju lokasi {{ $assessment->delivery->patient->name }}</p>
+<div class="relative animate-fade-in">
+    <!-- Map Container -->
+    <div id="routeMap"></div>
+
+    <!-- Floating Stats Section -->
+    <div class="floating-stats flex-wrap md:flex-nowrap">
+        <div class="stat-pill">
+            <div class="w-10 h-10 bg-gold-100 text-gold-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Estimasi Tiba</p>
+                <p class="text-sm font-black text-gray-800" id="countdownTimer">--:--</p>
+            </div>
         </div>
-        <div class="flex space-x-2">
-            <button onclick="cancelDelivery()" class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                <i class="fas fa-times mr-2"></i> Batalkan
-            </button>
+
+        <div class="stat-pill">
+            <div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
+                <i class="fas fa-route"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Sisa Jarak</p>
+                <p class="text-sm font-black text-gray-800" id="distanceDisplay">-- km</p>
+            </div>
+        </div>
+
+        <div class="stat-pill hidden md:flex">
+            <div class="w-10 h-10 bg-tni-100 text-tni-700 rounded-xl flex items-center justify-center">
+                <i class="fas fa-user"></i>
+            </div>
+            <div>
+                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Tujuan Pasien</p>
+                <p class="text-sm font-black text-gray-800">{{ $assessment->delivery->patient->name }}</p>
+            </div>
         </div>
     </div>
 
-    <!-- Route Information -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Patient Info -->
-        <div class="route-info-card">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Informasi Pasien</h3>
-            <div class="space-y-3">
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Nama Pasien</label>
-                    <p class="text-sm text-gray-900">{{ $assessment->delivery->patient->name }}</p>
+    <!-- Bottom Controls -->
+    <div class="bottom-controls flex-col md:flex-row gap-4">
+        <!-- Floating Info Card (Bottom Left) -->
+        <div class="pointer-events-auto bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl border border-white/20 w-full md:w-80">
+            <h4 class="text-xs font-black text-gold-600 uppercase tracking-widest mb-4">Target Pengantaran</h4>
+            <div class="space-y-4">
+                <div class="flex gap-3">
+                    <i class="fas fa-map-marker-alt text-red-500 mt-1"></i>
+                    <p class="text-[11px] font-bold text-gray-700 leading-relaxed">{{ $assessment->delivery->delivery_address }}</p>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500">No. Telepon</label>
-                    <p class="text-sm text-gray-900">{{ $assessment->delivery->patient->phone }}</p>
+                <div class="flex gap-3">
+                    <i class="fas fa-phone text-tni-500 mt-0.5"></i>
+                    <p class="text-[11px] font-bold text-gray-700">{{ $assessment->delivery->patient->phone }}</p>
                 </div>
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Alamat</label>
-                    <p class="text-sm text-gray-900">{{ $assessment->delivery->delivery_address }}</p>
+                
+                <div class="pt-4 border-t border-gray-100">
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assessment->delivery->latitude }},{{ $assessment->delivery->longitude }}" 
+                       target="_blank"
+                       class="flex items-center justify-center gap-3 w-full py-3 bg-white border-2 border-gold-500 text-gold-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-50 transition-all">
+                        <i class="fas fa-location-arrow"></i>
+                        Buka di Google Maps
+                    </a>
                 </div>
-                @if($assessment->delivery->notes)
-                <div>
-                    <label class="text-sm font-medium text-gray-500">Catatan Khusus</label>
-                    <p class="text-sm text-gray-900">{{ $assessment->delivery->notes }}</p>
+                
+                @if($assessment->delivery->prescription)
+                <div class="pt-4 border-t border-gray-100">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2">Obat Dibawa:</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        @php $meds = $assessment->delivery->prescription->medications ?? [['name' => $assessment->delivery->prescription->medication_name]]; @endphp
+                        @foreach(array_slice($meds, 0, 2) as $med)
+                        <span class="text-[9px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg font-black border border-blue-100">
+                            {{ $med['name'] }}
+                        </span>
+                        @endforeach
+                        @if(count($meds) > 2)
+                        <span class="text-[9px] text-gray-400 font-bold">+{{ count($meds)-2 }} lainnya</span>
+                        @endif
+                    </div>
                 </div>
                 @endif
             </div>
         </div>
 
-        <!-- Prescription Info -->
-        <div class="route-info-card">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Daftar Obat Terdaftar</h3>
-            @if($assessment->delivery->prescription)
-            <div class="space-y-4">
-                @php
-                    $meds = $assessment->delivery->prescription->medications ?? [
-                        [
-                            'name' => $assessment->delivery->prescription->medication_name,
-                            'dosage' => $assessment->delivery->prescription->dosage,
-                            'frequency' => $assessment->delivery->prescription->frequency,
-                            'instructions' => $assessment->delivery->prescription->instructions
-                        ]
-                    ];
-                @endphp
-
-                @foreach($meds as $i => $med)
-                <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                    <div class="font-bold text-sm text-blue-700 flex items-center mb-2">
-                        <span class="w-5 h-5 bg-blue-500 text-white text-[10px] rounded-full flex items-center justify-center mr-2">{{ $i + 1 }}</span>
-                        {{ $med['name'] }}
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-[10px]">
-                        <div class="text-gray-600"><strong>Dosis:</strong> {{ $med['dosage'] ?? '-' }}</div>
-                        <div class="text-gray-600"><strong>Freq:</strong> {{ $med['frequency'] ?? '-' }}</div>
-                    </div>
-                    @if(!empty($med['instructions']))
-                    <p class="mt-2 text-[10px] italic text-gray-400 bg-white p-1 rounded border border-gray-50">"{{ $med['instructions'] }}"</p>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-            @else
-            <p class="text-sm text-gray-500 italic">Tidak ada informasi resep</p>
-            @endif
-        </div>
-
-        <!-- Route Stats -->
-        <div class="route-info-card">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Statistik Rute</h3>
-            <div class="space-y-4">
-                <div class="countdown-timer" id="countdownTimer">
-                    --:--
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="text-center p-3 bg-blue-50 rounded-lg">
-                        <div class="text-2xl font-bold text-blue-600" id="distanceDisplay">0 km</div>
-                        <div class="text-sm text-gray-600">Jarak</div>
-                    </div>
-                    <div class="text-center p-3 bg-green-50 rounded-lg">
-                        <div class="text-2xl font-bold text-green-600" id="timeDisplay">0 min</div>
-                        <div class="text-sm text-gray-600">Estimasi</div>
-                    </div>
-                </div>
-                <div class="pt-4 border-t border-gray-200">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-600">Waktu Mulai:</span>
-                        <span class="font-medium text-gray-900" id="startTime">
-                            {{ $assessment->start_time ? $assessment->start_time->format('H:i') : 'Belum dimulai' }}
-                        </span>
-                    </div>
-                    <div class="flex justify-between text-sm mt-2">
-                        <span class="text-gray-600">Status:</span>
-                        <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
-                            Dalam Perjalanan
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Map Container -->
-    <div class="relative mb-6">
-        <div id="routeMap"></div>
-        <div class="navigation-controls">
-            <button onclick="getCurrentLocation()" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                <i class="fas fa-location-arrow mr-2"></i> Update Lokasi
+        <!-- Right Action Group -->
+        <div class="action-group w-full md:w-auto">
+            <button onclick="getCurrentLocation()" class="w-12 h-12 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-xl transition-all border border-white/10" title="Update Lokasi">
+                <i class="fas fa-location-arrow"></i>
             </button>
-            <button onclick="calculateRoute()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                <i class="fas fa-route mr-2"></i> Hitung Ulang Rute
+            <button onclick="toggleCancelModal()" class="w-12 h-12 flex items-center justify-center bg-red-500/20 hover:bg-red-500 text-red-100 rounded-xl transition-all border border-red-500/30" title="Batalkan">
+                <i class="fas fa-times"></i>
             </button>
-            <button onclick="markArrival()" id="arrivalBtn" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
-                <i class="fas fa-flag-checkered mr-2"></i> Tandai Sampai
+            <button onclick="markArrival()" id="arrivalBtn" class="flex-1 md:flex-none px-8 py-3 bg-gradient-to-r from-gold-400 to-gold-600 text-tni-900 rounded-xl font-black uppercase tracking-widest text-xs hover:from-gold-300 hover:to-gold-500 transition-all shadow-xl shadow-gold-500/20 flex items-center justify-center gap-2">
+                <i class="fas fa-flag-checkered"></i> Tiba di Lokasi
             </button>
-        </div>
-    </div>
-
-    <!-- Delivery Instructions -->
-    <div class="route-info-card">
-        <h3 class="text-lg font-medium text-gray-900 mb-4">Instruksi Pengantaran</h3>
-        <div class="space-y-3">
-            <div class="flex items-start">
-                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                    <i class="fas fa-1 text-blue-600 text-xs"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-900">Pastikan obat dalam kondisi baik sebelum diberikan</p>
-                </div>
-            </div>
-            <div class="flex items-start">
-                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                    <i class="fas fa-2 text-blue-600 text-xs"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-900">Verifikasi identitas penerima obat</p>
-                </div>
-            </div>
-            <div class="flex items-start">
-                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                    <i class="fas fa-3 text-blue-600 text-xs"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-900">Jelaskan cara penggunaan dan efek samping</p>
-                </div>
-            </div>
-            <div class="flex items-start">
-                <div class="flex-shrink-0 h-6 w-6 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                    <i class="fas fa-4 text-blue-600 text-xs"></i>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-900">Dokumentasikan serah terima dengan foto</p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal Panduan (Hidden by default) -->
+<div id="instructionModal" class="fixed inset-0 z-[2000] flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-tni-900/80 backdrop-blur-md" onclick="toggleInstructions()"></div>
+    <div class="relative bg-white rounded-[2.5rem] p-10 max-w-md w-full shadow-2xl mx-4">
+        <h3 class="text-xl font-black text-gray-800 mb-6 flex items-center gap-3">
+            <i class="fas fa-clipboard-list text-gold-500"></i>
+            Instruksi Penting
+        </h3>
+        <div class="space-y-6">
+            @foreach(['Verifikasi identitas pasien dengan benar', 'Pastikan obat tidak rusak/terbuka', 'Jelaskan dosis penggunaan', 'Lakukan dokumentasi foto penyerahan'] as $i => $inst)
+            <div class="flex gap-4">
+                <span class="w-8 h-8 rounded-full bg-tni-100 text-tni-700 flex items-center justify-center font-black text-xs shrink-0">{{ $i+1 }}</span>
+                <p class="text-sm text-gray-600 font-bold leading-relaxed">{{ $inst }}</p>
+            </div>
+            @endforeach
+        </div>
+        <button onclick="toggleInstructions()" class="w-full mt-10 py-4 bg-tni-800 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all">
+            Saya Mengerti
+        </button>
+    </div>
+</div>
+
+    <!-- Cancel Modal -->
+    <div id="cancelModal" class="fixed inset-0 z-[3000] flex items-center justify-center hidden p-6">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+        <div class="relative bg-white rounded-[3rem] p-10 max-w-sm w-full text-center shadow-2xl border border-gray-100 animate-fade-in">
+            <div class="w-20 h-20 bg-red-50 text-red-500 rounded-[2rem] flex items-center justify-center text-3xl mx-auto mb-6 shadow-inner">
+                <i class="fas fa-ban"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-800 mb-3">Batalkan Tugas?</h3>
+            <p class="text-gray-500 font-bold text-sm leading-relaxed mb-10">Tugas pengantaran akan dihentikan dan status akan dikembalikan menjadi 'Menunggu'. Konfirmasi pembatalan?</p>
+            
+            <div class="space-y-3">
+                <button onclick="confirmCancellation()" id="btnConfirmCancel" class="w-full py-4 bg-red-600 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/20">
+                    Ya, Batalkan Pengantaran
+                </button>
+                <button onclick="toggleCancelModal()" class="w-full py-4 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase tracking-widest hover:bg-gray-200 transition-all">
+                    Kembali ke Navigasi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Cancel Modal -->
+    <div id="successCancelModal" class="fixed inset-0 z-[4000] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-tni-900/90 backdrop-blur-xl"></div>
+        <div class="relative bg-white rounded-[3rem] p-12 max-w-sm w-full text-center shadow-2xl">
+            <div class="w-24 h-24 bg-red-50 text-red-500 rounded-[2.5rem] flex items-center justify-center text-4xl mx-auto mb-8 shadow-inner">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-800 mb-2">Dibatalkan</h3>
+            <p class="text-gray-500 font-bold text-sm leading-relaxed mb-8">Pengantaran telah berhasil dibatalkan. Mengarahkan kembali ke daftar tugas...</p>
+            <div class="text-xs font-black text-tni-800 uppercase tracking-widest">
+                <i class="fas fa-spinner animate-spin mr-3"></i> Memuat...
+            </div>
+        </div>
+    </div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -250,8 +259,8 @@ let currentLocationMarker;
 let destinationMarker;
 let currentLocation = null;
 let destination = {
-    lat: {{ $assessment->delivery->latitude ?? -6.2088 }},
-    lng: {{ $assessment->delivery->longitude ?? 106.8456 }}
+    lat: {{ $assessment->delivery->latitude && $assessment->delivery->latitude > 0 ? $assessment->delivery->latitude : 5.1812 }},
+    lng: {{ $assessment->delivery->longitude && $assessment->delivery->latitude > 0 ? $assessment->delivery->longitude : 97.1472 }}
 };
 let routeInterval;
 let countdownInterval;
@@ -259,36 +268,38 @@ let estimatedMinutes = 0;
 let distanceKm = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map
     initializeMap();
-    
-    // Start delivery process
     startDelivery();
-    
-    // Start location tracking
     startLocationTracking();
+    
+    // Show instructions on first load
+    setTimeout(toggleInstructions, 1000);
 });
 
+function toggleInstructions() {
+    document.getElementById('instructionModal').classList.toggle('hidden');
+}
+
 function initializeMap() {
-    // Initialize map centered on destination
-    map = L.map('routeMap').setView([destination.lat, destination.lng], 13);
+    map = L.map('routeMap', {
+        zoomControl: true
+    }).setView([destination.lat, destination.lng], 15);
     
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '© OpenStreetMap'
     }).addTo(map);
+
+    // Reposition zoom controls to right center
+    map.zoomControl.setPosition('topright');
     
-    // Add destination marker
     destinationMarker = L.marker([destination.lat, destination.lng], {
         icon: L.divIcon({
             className: 'destination-marker',
-            iconSize: [26, 26],
-            iconAnchor: [13, 13]
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
         })
-    }).addTo(map)
-    .bindPopup(`<b>Tujuan:</b><br>${destinationAddress}`)
-    .openPopup();
+    }).addTo(map);
     
-    // Get current location
     getCurrentLocation();
 }
 
@@ -299,15 +310,6 @@ function startDelivery() {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Content-Type': 'application/json'
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('Delivery started successfully');
-        }
-    })
-    .catch(error => {
-        console.error('Error starting delivery:', error);
     });
 }
 
@@ -323,137 +325,96 @@ function getCurrentLocation() {
                 calculateRoute();
             },
             function(error) {
-                console.log('Geolocation error:', error);
-                // Use default location if geolocation fails
-                currentLocation = { lat: -6.2088, lng: 106.8456 };
-                updateLocationOnMap();
-                calculateRoute();
-            }
+                console.error('Location Error:', error);
+            },
+            { enableHighAccuracy: true }
         );
-    } else {
-        alert('Browser tidak mendukung geolocation');
-        currentLocation = { lat: -6.2088, lng: 106.8456 };
-        updateLocationOnMap();
-        calculateRoute();
     }
 }
 
 function updateLocationOnMap() {
     if (!currentLocation) return;
     
-    // Remove existing current location marker
-    if (currentLocationMarker) {
-        map.removeLayer(currentLocationMarker);
-    }
+    if (currentLocationMarker) map.removeLayer(currentLocationMarker);
     
-    // Add new current location marker
     currentLocationMarker = L.marker([currentLocation.lat, currentLocation.lng], {
         icon: L.divIcon({
             className: 'current-marker',
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
         })
-    }).addTo(map)
-    .bindPopup('<b>Lokasi Anda Saat Ini</b>');
+    }).addTo(map);
     
-    // Center map on current location
-    map.setView([currentLocation.lat, currentLocation.lng], 14);
-    
-    // Send location to server
     updateLocationToServer();
 }
 
 function calculateRoute() {
     if (!currentLocation || !destination) return;
     
-    // Calculate distance using Haversine formula
     const lat1 = currentLocation.lat * Math.PI / 180;
     const lon1 = currentLocation.lng * Math.PI / 180;
     const lat2 = destination.lat * Math.PI / 180;
     const lon2 = destination.lng * Math.PI / 180;
-    
     const dlat = lat2 - lat1;
     const dlon = lon2 - lon1;
-    
-    const a = Math.sin(dlat/2) * Math.sin(dlat/2) +
-              Math.cos(lat1) * Math.cos(lat2) *
-              Math.sin(dlon/2) * Math.sin(dlon/2);
+    const a = Math.sin(dlat/2) * Math.sin(dlat/2) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dlon/2) * Math.sin(dlon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     
-    distanceKm = 6371 * c; // Earth radius in km
-    estimatedMinutes = Math.round((distanceKm / 30) * 60); // Assume 30 km/h average speed
+    distanceKm = 6371 * c;
+    estimatedMinutes = Math.max(1, Math.round((distanceKm / 25) * 60)); // 25km/h avg
     
-    // Update display
     document.getElementById('distanceDisplay').textContent = distanceKm.toFixed(1) + ' km';
-    document.getElementById('timeDisplay').textContent = estimatedMinutes + ' min';
     
-    // Draw route line
     drawRouteLine();
-    
-    // Start countdown timer
     startCountdownTimer();
-    
-    // Send route data to server
-    sendRouteDataToServer();
 }
 
 function drawRouteLine() {
-    if (!currentLocation || !destination) return;
+    if (routePolyline) map.removeLayer(routePolyline);
     
-    // Remove existing polyline
-    if (routePolyline) {
-        map.removeLayer(routePolyline);
-    }
-    
-    // Create new polyline
     routePolyline = L.polyline([
         [currentLocation.lat, currentLocation.lng],
         [destination.lat, destination.lng]
     ], {
         color: '#3b82f6',
-        weight: 4,
-        opacity: 0.7,
-        dashArray: '10, 10'
+        weight: 6,
+        opacity: 0.5,
+        dashArray: '10, 15',
+        lineCap: 'round'
     }).addTo(map);
     
-    // Fit map to show both points
-    map.fitBounds(routePolyline.getBounds());
+    map.fitBounds(routePolyline.getBounds(), { padding: [100, 100] });
 }
 
 function startCountdownTimer() {
-    // Clear existing interval
-    if (countdownInterval) {
-        clearInterval(countdownInterval);
-    }
+    if (countdownInterval) clearInterval(countdownInterval);
     
-    let remainingSeconds = estimatedMinutes * 60;
-    updateCountdownDisplay(remainingSeconds);
+    let remainingSeconds = Math.round(estimatedMinutes * 60);
     
-    // Update countdown every second
     countdownInterval = setInterval(() => {
         if (remainingSeconds > 0) {
             remainingSeconds--;
-            updateCountdownDisplay(remainingSeconds);
+            
+            const hours = Math.floor(remainingSeconds / 3600);
+            const mins = Math.floor((remainingSeconds % 3600) / 60);
+            const secs = remainingSeconds % 60;
+            
+            let display = '';
+            if (hours > 0) {
+                display += hours.toString().padStart(2, '0') + ':';
+            }
+            display += mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+            
+            document.getElementById('countdownTimer').textContent = display;
         } else {
             clearInterval(countdownInterval);
-            document.getElementById('countdownTimer').textContent = '00:00';
-            document.getElementById('countdownTimer').classList.add('text-red-600');
+            document.getElementById('countdownTimer').textContent = 'Tiba di Lokasi';
         }
     }, 1000);
 }
 
-function updateCountdownDisplay(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    const display = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-    document.getElementById('countdownTimer').textContent = display;
-}
-
 function startLocationTracking() {
-    // Update location every 30 seconds
-    routeInterval = setInterval(() => {
-        getCurrentLocation();
-    }, 30000);
+    routeInterval = setInterval(getCurrentLocation, 15000);
 }
 
 function updateLocationToServer() {
@@ -469,53 +430,11 @@ function updateLocationToServer() {
             distance_km: distanceKm,
             estimated_minutes: estimatedMinutes
         })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (!data.success) {
-            console.error('Failed to update location:', data);
-        }
-    })
-    .catch(error => {
-        console.error('Error updating location:', error);
-    });
-}
-
-function sendRouteDataToServer() {
-    fetch(`/delivery-process/{{ $assessment->id }}/calculate-route`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            current_lat: currentLocation.lat,
-            current_lng: currentLocation.lng
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.distance_km) {
-            distanceKm = data.distance_km;
-            estimatedMinutes = data.estimated_minutes;
-            
-            document.getElementById('distanceDisplay').textContent = distanceKm.toFixed(1) + ' km';
-            document.getElementById('timeDisplay').textContent = estimatedMinutes + ' min';
-            
-            // Update countdown timer
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-            }
-            startCountdownTimer();
-        }
-    })
-    .catch(error => {
-        console.error('Error calculating route:', error);
     });
 }
 
 function markArrival() {
-    if (confirm('Apakah Anda telah tiba di lokasi pasien?')) {
+    if (confirm('Konfirmasi Kedatangan di Lokasi Pasien?')) {
         fetch(`/delivery-process/{{ $assessment->id }}/arrival`, {
             method: 'POST',
             headers: {
@@ -526,52 +445,55 @@ function markArrival() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Stop location tracking
-                clearInterval(routeInterval);
-                clearInterval(countdownInterval);
-                
-                // Redirect to assessment page
                 window.location.href = data.redirect_url;
-            } else {
-                alert('Gagal menandai kedatangan: ' + (data.message || 'Terjadi kesalahan'));
             }
-        })
-        .catch(error => {
-            console.error('Error marking arrival:', error);
-            alert('Terjadi kesalahan saat menandai kedatangan');
         });
     }
 }
 
-function cancelDelivery() {
-    if (confirm('Batalkan pengantaran ini? Status akan dikembalikan ke pending.')) {
-        fetch('{{ route("delivery-process.cancel", $assessment->id) }}', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                window.location.href = data.redirect_url || '{{ route("delivery-process.index") }}';
-            } else {
-                alert('Gagal membatalkan: ' + (data.message || 'Terjadi kesalahan'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat membatalkan pengantaran');
-        });
-    }
+function toggleCancelModal() {
+    document.getElementById('cancelModal').classList.toggle('hidden');
 }
 
-// Clean up intervals when page unloads
-window.addEventListener('beforeunload', function() {
-    if (routeInterval) clearInterval(routeInterval);
-    if (countdownInterval) clearInterval(countdownInterval);
-});
+function confirmCancellation() {
+    const btn = document.getElementById('btnConfirmCancel');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Memproses...';
+
+    fetch('{{ route("delivery-process.cancel", $assessment->id) }}', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('cancelModal').classList.add('hidden');
+            document.getElementById('successCancelModal').classList.remove('hidden');
+            setTimeout(() => {
+                window.location.href = '{{ route("delivery-process.index") }}';
+            }, 2000);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        btn.disabled = false;
+        btn.innerHTML = 'Ya, Batalkan Pengantaran';
+        alert('Gagal membatalkan pengantaran. Silakan coba lagi.');
+    });
+}
 </script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.8s ease-out forwards;
+    }
+</style>
 @endsection

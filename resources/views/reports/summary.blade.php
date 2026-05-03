@@ -2,10 +2,9 @@
 
 @section('title', 'Ringkasan Eksekutif')
 @section('page-title', 'Laporan Ringkasan')
-
 @section('content')
 <div class="max-w-6xl mx-auto space-y-8 animate-fade-in pb-12">
-    <!-- Header with Actions -->
+    <!-- Header with Actions (Visible on Screen) -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
         <div>
             <h2 class="text-3xl font-black text-tni-900 tracking-tight">Ringkasan Eksekutif Meditrack</h2>
@@ -21,109 +20,119 @@
         </div>
     </div>
 
-    <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-tni-800 transition-all duration-300">
-            <div class="w-12 h-12 bg-tni-50 text-tni-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors">
-                <i class="fas fa-users text-xl"></i>
+    <!-- Formal Letterhead (Visible ONLY on print) -->
+    <div class="hidden print:block mb-12 border-b-4 border-double border-black pb-8">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <div class="w-24 h-24 bg-tni-800 rounded-2xl flex items-center justify-center text-gold-400 text-5xl shadow-lg">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black uppercase tracking-tight leading-none mb-1">Tentara Nasional Indonesia Angkatan Darat</h1>
+                    <h2 class="text-xl font-bold uppercase tracking-tight text-gray-800 leading-none mb-1">Kesehatan Daerah Militer Iskandar Muda</h2>
+                    <h3 class="text-lg font-bold uppercase text-tni-900 leading-none">Rumkit TK III IM 07.01 Lhokseumawe</h3>
+                    <p class="text-sm text-gray-500 mt-3 font-medium">Jl. Sultan Iskandar Muda No. 1, Kec. Banda Sakti, Kota Lhokseumawe, Aceh 24311</p>
+                </div>
             </div>
-            <div class="text-3xl font-black text-tni-900 mb-1 group-hover:text-white transition-colors">{{ $patientStats['total'] }}</div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-tni-300 transition-colors">Total Pasien</div>
+            <div class="text-right">
+                <div class="px-5 py-3 bg-gray-100 rounded-xl mb-3 border border-gray-200">
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Dokumen Resmi</p>
+                    <p class="text-base font-black text-tni-900">MT/REP/{{ date('Ymd') }}</p>
+                </div>
+                <p class="text-xs font-bold text-gray-400">Dicetak: {{ now()->format('d/m/Y H:i') }} WIB</p>
+            </div>
         </div>
-
-        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-green-600 transition-all duration-300">
-            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors">
-                <i class="fas fa-truck-check text-xl"></i>
-            </div>
-            <div class="text-3xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors">{{ $deliveryStats['delivered'] }}</div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-green-200 transition-colors">Berhasil Diantar</div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-gold-500 transition-all duration-300">
-            <div class="w-12 h-12 bg-gold-50 text-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors">
-                <i class="fas fa-percent text-xl"></i>
-            </div>
-            <div class="text-3xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors">{{ $successRate }}%</div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gold-100 transition-colors">Tingkat Kesuksesan</div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-blue-600 transition-all duration-300">
-            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors">
-                <i class="fas fa-hand-holding-dollar text-xl"></i>
-            </div>
-            <div class="text-2xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors">Rp {{ number_format($estimatedRevenue, 0, ',', '.') }}</div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-blue-200 transition-colors">Estimasi Efisiensi</div>
+        <div class="text-center mt-12">
+            <h2 class="text-2xl font-black uppercase border-b-2 border-black inline-block pb-1 mb-2">Laporan Ringkasan Eksekutif</h2>
+            <p class="text-sm font-bold text-gray-600">Periode Data: {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Delivery Performance Trend -->
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
-            <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/50">
-                <h3 class="font-black text-tni-900 uppercase tracking-widest text-xs">Tren Pengantaran Harian</h3>
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-tni-800 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
+            <div class="w-12 h-12 bg-tni-50 text-tni-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
+                <i class="fas fa-users text-xl"></i>
             </div>
-            <div class="p-8">
-                <div class="space-y-4">
-                    @foreach($dailyTrend as $trend)
-                    <div class="flex items-center gap-4">
-                        <div class="text-[10px] font-black text-gray-400 w-24">{{ \Carbon\Carbon::parse($trend['date'])->format('d M') }}</div>
-                        <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden flex">
-                            <div class="bg-tni-600 h-full" style="width: {{ ($trend['delivered'] / max($trend['count'], 1)) * 100 }}%"></div>
-                        </div>
-                        <div class="text-xs font-bold text-tni-700 w-12 text-right">{{ $trend['count'] }}</div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
+            <div class="text-3xl font-black text-tni-900 mb-1 group-hover:text-white transition-colors print:text-xl">{{ $patientStats['total'] }}</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-tni-300 transition-colors">Total Pasien</div>
         </div>
 
-        <!-- Top Couriers -->
-        <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
-            <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/50">
-                <h3 class="font-black text-tni-900 uppercase tracking-widest text-xs">Performa Kurir Terbaik</h3>
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-green-600 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
+            <div class="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
+                <i class="fas fa-truck-check text-xl"></i>
             </div>
-            <div class="p-8">
-                <div class="space-y-6">
-                    @foreach($topCouriers as $courier)
-                    <div class="flex items-center justify-between group">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-xl bg-tni-50 text-tni-600 flex items-center justify-center font-black group-hover:bg-tni-600 group-hover:text-white transition-colors">
-                                {{ substr($courier['courier_name'], 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="text-sm font-bold text-gray-800">{{ $courier['courier_name'] }}</p>
-                                <p class="text-[10px] text-gray-400 uppercase font-black">{{ $courier['delivered'] }} Berhasil / {{ $courier['total'] }} Total</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm font-black text-tni-700">{{ $courier['success_rate'] }}%</p>
-                            <p class="text-[10px] font-bold text-green-500">Success Rate</p>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
+            <div class="text-3xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors print:text-xl">{{ $deliveryStats['delivered'] }}</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-green-200 transition-colors">Berhasil Diantar</div>
         </div>
 
-        <!-- Common Diagnoses -->
-        <div class="lg:col-span-2 bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden">
-            <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/50">
-                <h3 class="font-black text-tni-900 uppercase tracking-widest text-xs">Distribusi Diagnosis Penyakit Terbanyak</h3>
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-gold-500 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
+            <div class="w-12 h-12 bg-gold-50 text-gold-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
+                <i class="fas fa-percent text-xl"></i>
             </div>
-            <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                @foreach($commonDiagnoses as $diagnosis)
-                <div class="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                    <div class="flex justify-between items-start mb-4">
-                        <h4 class="font-black text-tni-800 text-sm max-w-[70%] leading-tight">{{ $diagnosis['diagnosis'] }}</h4>
-                        <span class="px-3 py-1 bg-white text-tni-600 rounded-full text-xs font-black shadow-sm">{{ $diagnosis['count'] }} Pasien</span>
-                    </div>
-                    <div class="w-full bg-white rounded-full h-2 shadow-inner overflow-hidden">
-                        <div class="bg-gold-500 h-full rounded-full" style="width: {{ $diagnosis['percentage'] }}%"></div>
-                    </div>
-                    <div class="mt-2 text-right text-[10px] font-black text-gold-600">{{ $diagnosis['percentage'] }}% dari Total Pasien</div>
-                </div>
-                @endforeach
+            <div class="text-3xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors print:text-xl">{{ $successRate }}%</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-gold-100 transition-colors">Sukses Rate</div>
+        </div>
+
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-blue-600 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
+                <i class="fas fa-hand-holding-dollar text-xl"></i>
             </div>
+            <div class="text-2xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors print:text-xl">Rp {{ number_format($estimatedRevenue, 0, ',', '.') }}</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-blue-200 transition-colors">Efisiensi</div>
+        </div>
+    </div>
+
+    <!-- Formal Table for Print -->
+    <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-100 overflow-hidden print:border-gray-300 print:rounded-xl">
+        <div class="px-8 py-6 border-b border-gray-50 bg-gray-50/50 print:bg-gray-100">
+            <h3 class="font-black text-tni-900 uppercase tracking-widest text-xs">Rincian Performa Laporan</h3>
+        </div>
+        <div class="p-0 overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-gray-50 print:bg-gray-200">
+                        <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Data</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Volume</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Persentase</th>
+                        <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr>
+                        <td class="px-8 py-5 text-sm font-bold text-tni-900">Total Pasien Terdaftar</td>
+                        <td class="px-8 py-5 text-sm font-black text-center">{{ $patientStats['total'] }}</td>
+                        <td class="px-8 py-5 text-sm font-bold text-center">100%</td>
+                        <td class="px-8 py-5 text-xs text-gray-500 text-right">Data Pasien Aktif</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-5 text-sm font-bold text-tni-900">Pengantaran Selesai</td>
+                        <td class="px-8 py-5 text-sm font-black text-center">{{ $deliveryStats['delivered'] }}</td>
+                        <td class="px-8 py-5 text-sm font-bold text-center text-green-600">{{ round(($deliveryStats['delivered'] / max($deliveryStats['total'], 1)) * 100, 1) }}%</td>
+                        <td class="px-8 py-5 text-xs text-gray-500 text-right">Konfirmasi Penerimaan</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-5 text-sm font-bold text-tni-900">Pasien Urgent</td>
+                        <td class="px-8 py-5 text-sm font-black text-center">{{ $patientStats['total'] }}</td>
+                        <td class="px-8 py-5 text-sm font-bold text-center text-red-600">--%</td>
+                        <td class="px-8 py-5 text-xs text-gray-500 text-right">Prioritas Tinggi</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Print Footer / Signatures -->
+    <div class="hidden print:grid grid-cols-2 gap-20 mt-20">
+        <div class="text-center">
+            <p class="text-sm font-bold mb-20 text-gray-800">Mengetahui,<br>Kepala Instalasi Farmasi</p>
+            <div class="border-b border-black w-48 mx-auto mb-1"></div>
+            <p class="text-xs font-black uppercase">Pangkat / NRP</p>
+        </div>
+        <div class="text-center">
+            <p class="text-sm font-bold mb-20 text-gray-800">Lhokseumawe, {{ now()->format('d F Y') }}<br>Petugas Administrasi</p>
+            <div class="border-b border-black w-48 mx-auto mb-1"></div>
+            <p class="text-xs font-black uppercase">{{ auth()->user()->name }}</p>
         </div>
     </div>
 </div>
@@ -131,9 +140,14 @@
 <style>
     @media print {
         .no-print { display: none !important; }
-        body { background: white !important; }
-        .bg-white { border: 1px solid #eee !important; box-shadow: none !important; }
-        .rounded-\[2\.5rem\] { border-radius: 1rem !important; }
+        body { background: white !important; margin: 0; padding: 20px; }
+        .max-w-6xl { max-width: 100% !important; margin: 0 !important; }
+        .bg-white { border: 1px solid #ddd !important; box-shadow: none !important; }
+        .rounded-3xl, .rounded-\[2\.5rem\], .rounded-2xl { border-radius: 8px !important; }
+        .shadow-xl, .shadow-2xl { box-shadow: none !important; }
+        .animate-fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+        table { border-collapse: collapse !important; width: 100% !important; }
+        th, td { border: 1px solid #ddd !important; }
     }
 </style>
 @endsection

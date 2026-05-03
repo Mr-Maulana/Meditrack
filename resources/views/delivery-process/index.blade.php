@@ -1,237 +1,233 @@
 @extends('layouts.app')
 
-@section('title', 'Antar Obat')
-@section('page-title', 'Antar Obat')
+@section('title', 'Tugas Antar Obat')
+@section('page-title', 'Operasional Kurir')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">Proses Antar Obat</h2>
-            <p class="text-gray-600">Pilih dan proses pengantaran obat ke pasien</p>
+<div class="space-y-8 animate-fade-in pb-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+            <div class="w-14 h-14 bg-gradient-to-br from-tni-700 to-tni-900 rounded-2xl flex items-center justify-center text-gold-400 shadow-xl border border-tni-600">
+                <i class="fas fa-motorcycle text-2xl"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-gray-800 tracking-tight">Antar Obat</h2>
+                <p class="text-gray-500 text-sm font-medium">Kelola dan proses pengiriman obat ke alamat pasien.</p>
+            </div>
         </div>
         
-        <div class="flex space-x-2">
-            <button onclick="getCurrentLocation()" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                <i class="fas fa-location-arrow mr-2"></i> Lokasi Saya
+        <div class="flex items-center gap-3">
+            <button onclick="getCurrentLocation()" class="inline-flex items-center px-6 py-3 bg-white text-tni-700 border border-tni-100 rounded-2xl hover:bg-tni-50 transition-all shadow-sm font-bold group">
+                <i class="fas fa-location-crosshairs mr-2 group-hover:rotate-90 transition-transform"></i> Lokasi Saya
             </button>
         </div>
     </div>
 
-    <!-- In Progress Delivery -->
-    @if($inProgressDeliveries->count() > 0)
-    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-        <div class="flex items-center mb-4">
-            <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mr-3"></i>
-            <h3 class="text-lg font-medium text-yellow-800">Pengantaran Sedang Berjalan</h3>
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Tugas Tersedia</p>
+                <p class="text-2xl font-black text-gray-800">{{ $availableDeliveries->count() }}</p>
+            </div>
         </div>
         
-        @foreach($inProgressDeliveries as $delivery)
-        <div class="bg-white rounded-lg shadow p-6 mb-4">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
-                <div>
-                    <h4 class="font-medium text-gray-900">{{ $delivery->patient->name }}</h4>
-                    <div class="mt-2 space-y-1">
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-map-marker-alt mr-2"></i>
-                            <span>{{ $delivery->delivery_address }}</span>
-                        </div>
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-phone mr-2"></i>
-                            <span>{{ $delivery->patient->phone }}</span>
-                        </div>
-                        @if($delivery->assessment->start_time)
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-clock mr-2"></i>
-                            <span>Dimulai: {{ $delivery->assessment->start_time->format('H:i') }}</span>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-                
-                <div class="flex space-x-2">
-                    @if($delivery->assessment->arrival_time)
-                    <a href="{{ route('delivery-process.assessment', $delivery->assessment->id) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                        <i class="fas fa-clipboard-check mr-2"></i> Lanjutkan Assesmen
-                    </a>
-                    @else
-                    <a href="{{ route('delivery-process.route', $delivery->assessment->id) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        <i class="fas fa-route mr-2"></i> Lanjutkan Perjalanan
-                    </a>
-                    @endif
-                </div>
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-2xl bg-gold-50 text-gold-600 flex items-center justify-center text-xl shadow-inner">
+                <i class="fas fa-person-running"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sedang Berjalan</p>
+                <p class="text-2xl font-black text-gray-800">{{ $inProgressDeliveries->count() }}</p>
+            </div>
+        </div>
+        
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100 flex items-center gap-5">
+            <div class="w-12 h-12 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center text-xl shadow-inner">
+                <i class="fas fa-circle-check"></i>
+            </div>
+            <div>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Selesai Hari Ini</p>
+                <p class="text-2xl font-black text-gray-800">
+                    {{ Auth::user()->deliveries()->whereDate('delivered_at', today())->count() }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Delivery Banner -->
+    @if($inProgressDeliveries->count() > 0)
+    <div class="bg-gradient-to-br from-tni-800 to-tni-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-10">
+            <i class="fas fa-truck-fast text-[12rem] rotate-[-15deg]"></i>
+        </div>
+        
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-gold-500"></span>
+                </span>
+                <h3 class="text-lg font-black uppercase tracking-[0.2em] text-gold-400">Pengantaran Berjalan</h3>
             </div>
             
-            <!-- Prescription Info -->
-            @if($delivery->prescription)
-            <div class="mt-4 pt-4 border-t border-gray-200">
-                <h5 class="text-sm font-medium text-gray-700 mb-2">Daftar Obat:</h5>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    @php
-                        $meds = $delivery->prescription->medications ?? [
-                            [
-                                'name' => $delivery->prescription->medication_name,
-                                'dosage' => $delivery->prescription->dosage,
-                                'frequency' => $delivery->prescription->frequency
-                            ]
-                        ];
-                    @endphp
-                    @foreach($meds as $med)
-                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-100">
-                        <div class="font-bold text-sm text-gray-800">{{ $med['name'] }}</div>
-                        <div class="text-[10px] text-gray-500 mt-1">
-                            {{ $med['dosage'] ?? '-' }} | {{ $med['frequency'] ?? '-' }}
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-        </div>
-        @endforeach
-    </div>
-    @endif
-
-    <!-- Available Deliveries -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="p-6 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Daftar Pengantaran Tersedia</h3>
-            <p class="mt-1 text-sm text-gray-600">Pilih pasien untuk memulai pengantaran</p>
-        </div>
-        
-        <div class="p-6">
-            @if($availableDeliveries->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($availableDeliveries as $delivery)
-                <div class="border border-gray-200 rounded-lg p-6 hover:border-blue-300 hover:shadow-md transition">
-                    <!-- Patient Info -->
-                    <div class="mb-4">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h4 class="font-medium text-gray-900">{{ $delivery->patient->name }}</h4>
-                                <p class="text-sm text-gray-600">{{ $delivery->patient->patient_code }}</p>
+            <div class="space-y-6">
+                @foreach($inProgressDeliveries as $delivery)
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 hover:bg-white/15 transition-all">
+                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h4 class="text-xl font-bold text-white">{{ $delivery->patient->name }}</h4>
+                                <span class="px-3 py-0.5 bg-gold-500 text-tni-900 text-[10px] font-black rounded-full uppercase">{{ $delivery->patient->patient_code }}</span>
                             </div>
-                            @if($delivery->priority === 'urgent')
-                            <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
-                                <i class="fas fa-exclamation-triangle mr-1"></i> Urgent
-                            </span>
-                            @endif
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-gold-400 shrink-0">
+                                        <i class="fas fa-location-dot text-xs"></i>
+                                    </div>
+                                    <p class="text-sm text-tni-100 font-medium">{{ $delivery->delivery_address }}</p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-gold-400 shrink-0">
+                                        <i class="fas fa-clock text-xs"></i>
+                                    </div>
+                                    <p class="text-sm text-tni-100 font-medium">Dimulai: {{ $delivery->assessment->start_time ? $delivery->assessment->start_time->format('H:i') : '-' }}</p>
+                                </div>
+                            </div>
+
+                            <!-- Medications List (Daring/Daftar) -->
+                            <div class="mt-6">
+                                <p class="text-[10px] font-bold text-gold-400 uppercase tracking-widest mb-3">Daftar Obat Pasien:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @php
+                                        $meds = $delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name]];
+                                    @endphp
+                                    @foreach($meds as $med)
+                                    <div class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2">
+                                        <i class="fas fa-pills text-[10px] text-gold-500"></i>
+                                        <span class="text-xs font-bold text-white">{{ $med['name'] }}</span>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="mt-3 space-y-2">
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
-                                <span class="truncate">{{ Str::limit($delivery->delivery_address, 40) }}</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-phone mr-2 text-gray-400"></i>
-                                <span>{{ $delivery->patient->phone }}</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="fas fa-calendar mr-2 text-gray-400"></i>
-                                <span>Tanggal: {{ $delivery->delivery_date->format('d/m/Y') }}</span>
-                            </div>
+                        <div class="w-full lg:w-auto shrink-0">
+                            @if($delivery->assessment->arrival_time)
+                            <a href="{{ route('delivery-process.assessment', $delivery->assessment->id) }}" 
+                               class="flex items-center justify-center gap-2 px-8 py-4 bg-gold-500 text-tni-900 rounded-2xl font-black uppercase tracking-widest hover:bg-gold-400 transition-all shadow-xl shadow-gold-500/20 group w-full lg:w-auto">
+                                <i class="fas fa-clipboard-check group-hover:scale-110 transition-transform"></i> Lanjutkan Assesmen
+                            </a>
+                            @else
+                            <a href="{{ route('delivery-process.route', $delivery->assessment->id) }}" 
+                               class="flex items-center justify-center gap-2 px-8 py-4 bg-white text-tni-900 rounded-2xl font-black uppercase tracking-widest hover:bg-tni-50 transition-all shadow-xl group w-full lg:w-auto">
+                                <i class="fas fa-route group-hover:translate-x-1 transition-transform"></i> Navigasi Jalan
+                            </a>
+                            @endif
                         </div>
                     </div>
-                    
-                    <!-- Prescription Summary -->
-                    @if($delivery->prescription)
-                    <div class="mb-4 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <h5 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2">Daftar Obat:</h5>
-                        @php
-                            $meds = $delivery->prescription->medications ?? [
-                                ['name' => $delivery->prescription->medication_name]
-                            ];
-                        @endphp
-                        <div class="space-y-1.5">
-                            @foreach($meds as $med)
-                            <div class="text-[11px] text-blue-700 font-bold flex items-center">
-                                <i class="fas fa-pills mr-2 text-[10px] opacity-70"></i> 
-                                <span class="truncate">{{ $med['name'] }}</span>
-                            </div>
-                            @endforeach
-                        </div>
-                    </div>
-                    @endif
-                    
-                    <!-- Notes -->
-                    @if($delivery->notes)
-                    <div class="mb-4 p-3 bg-yellow-50 rounded">
-                        <h5 class="text-sm font-medium text-yellow-800 mb-1">Catatan:</h5>
-                        <p class="text-sm text-yellow-700">{{ $delivery->notes }}</p>
-                    </div>
-                    @endif
-                    
-                    <!-- Action Button -->
-                    <button onclick="selectDelivery({{ $delivery->id }})" 
-                            class="w-full mt-4 inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <i class="fas fa-truck mr-2"></i> Antar Obat Ini
-                    </button>
                 </div>
                 @endforeach
             </div>
-            @else
-            <div class="text-center py-12">
-                <i class="fas fa-truck text-4xl text-gray-300 mb-4"></i>
-                <h4 class="text-lg font-medium text-gray-700 mb-2">Tidak ada pengantaran tersedia</h4>
-                <p class="text-gray-600">Semua pengantaran telah diproses atau sedang dalam perjalanan.</p>
-            </div>
-            @endif
         </div>
     </div>
+    @endif
 
-    <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
-                    <i class="fas fa-truck"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Total Tersedia</p>
-                    <p class="text-2xl font-bold">{{ $availableDeliveries->count() }}</p>
-                </div>
-            </div>
+    <!-- Available Task List -->
+    <div class="space-y-6">
+        <div class="flex items-center justify-between">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-wider flex items-center gap-3">
+                <span class="w-2 h-8 bg-gold-500 rounded-full"></span>
+                Tugas Pengantaran Baru
+            </h3>
+            <span class="text-xs font-bold text-gray-400 uppercase">{{ now()->format('d M Y') }}</span>
         </div>
-        
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
-                    <i class="fas fa-spinner"></i>
+
+        @if($availableDeliveries->count() > 0)
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach($availableDeliveries as $delivery)
+            <div class="bg-white rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl hover:border-gold-200 transition-all duration-300 p-6 flex flex-col group overflow-hidden relative">
+                @if($delivery->priority === 'urgent')
+                <div class="absolute top-0 right-0">
+                    <div class="bg-red-500 text-white text-[9px] font-black uppercase py-1 px-4 rounded-bl-xl tracking-tighter animate-pulse">
+                        Urgent
+                    </div>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Dalam Proses</p>
-                    <p class="text-2xl font-bold">{{ $inProgressDeliveries->count() }}</p>
+                @endif
+
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-tni-700 font-black text-xl group-hover:bg-tni-800 group-hover:text-white transition-colors duration-300">
+                        {{ substr($delivery->patient->name, 0, 1) }}
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800">{{ $delivery->patient->name }}</h4>
+                        <p class="text-[10px] text-tni-600 font-bold uppercase">{{ $delivery->patient->patient_code }}</p>
+                    </div>
                 </div>
+
+                <div class="space-y-3 mb-6 flex-1">
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                        <i class="fas fa-map-marker-alt text-tni-400 mt-1 text-xs"></i>
+                        <p class="text-[11px] text-gray-600 font-medium leading-relaxed">{{ Str::limit($delivery->delivery_address, 80) }}</p>
+                    </div>
+                    
+                    <!-- Medication Preview -->
+                    @if($delivery->prescription)
+                    <div class="p-3 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+                        <p class="text-[9px] font-bold text-blue-800 uppercase tracking-widest mb-2">Daftar Obat:</p>
+                        @php
+                            $meds = $delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name]];
+                        @endphp
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach(array_slice($meds, 0, 3) as $med)
+                            <span class="text-[10px] bg-white border border-blue-100 text-blue-700 px-2 py-0.5 rounded-lg font-bold">
+                                {{ $med['name'] }}
+                            </span>
+                            @endforeach
+                            @if(count($meds) > 3)
+                            <span class="text-[9px] text-blue-500 font-bold px-1">+{{ count($meds) - 3 }} Lainnya</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
+                </div>
+
+                <button onclick="selectDelivery({{ $delivery->id }})" 
+                        class="w-full py-4 bg-tni-800 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-black transition-all shadow-lg shadow-tni-900/10 group-hover:scale-[1.02]">
+                    <i class="fas fa-truck-fast mr-2"></i> Proses Antar
+                </button>
             </div>
+            @endforeach
         </div>
-        
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 text-green-600">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-500">Selesai Hari Ini</p>
-                    <p class="text-2xl font-bold">
-                        {{ Auth::user()->deliveries()->whereDate('delivered_at', today())->count() }}
-                    </p>
-                </div>
+        @else
+        <div class="bg-white rounded-[2.5rem] p-16 text-center border-2 border-dashed border-gray-100">
+            <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+                <i class="fas fa-box-open text-4xl"></i>
             </div>
+            <h4 class="text-xl font-bold text-gray-800 mb-2">Belum Ada Tugas Baru</h4>
+            <p class="text-gray-500 max-w-sm mx-auto">Semua pengantaran untuk hari ini telah selesai atau sedang diproses. Silakan cek kembali nanti.</p>
         </div>
+        @endif
     </div>
 </div>
 
-<!-- Loading Modal -->
-<div id="loadingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
-    <div class="relative top-1/3 mx-auto p-5 w-64">
-        <div class="bg-white rounded-lg p-6 text-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p class="text-gray-700">Memulai pengantaran...</p>
+<!-- Modal Loading Premium -->
+<div id="loadingModal" class="fixed inset-0 bg-tni-900/80 backdrop-blur-md overflow-y-auto h-full w-full z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-[2.5rem] p-10 max-w-sm w-full mx-4 shadow-2xl transform transition-all text-center">
+        <div class="relative w-20 h-20 mx-auto mb-6">
+            <div class="absolute inset-0 rounded-full border-4 border-gray-100"></div>
+            <div class="absolute inset-0 rounded-full border-4 border-gold-500 border-t-transparent animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center text-gold-600">
+                <i class="fas fa-motorcycle text-xl"></i>
+            </div>
         </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Menyiapkan Perjalanan</h3>
+        <p class="text-sm text-gray-500">Sistem sedang mengaktifkan pelacakan dan menyiapkan rute navigasi...</p>
     </div>
 </div>
 
@@ -239,6 +235,10 @@
 let currentLocation = null;
 
 function getCurrentLocation() {
+    const btn = event.currentTarget;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Mencari...';
+    
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
             function(position) {
@@ -246,22 +246,23 @@ function getCurrentLocation() {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
-                alert(`Lokasi berhasil diperoleh: ${currentLocation.lat.toFixed(6)}, ${currentLocation.lng.toFixed(6)}`);
+                btn.innerHTML = originalContent;
+                btn.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+                alert(`Lokasi Berhasil Ditemukan!\nLatitude: ${currentLocation.lat.toFixed(6)}\nLongitude: ${currentLocation.lng.toFixed(6)}`);
             },
             function(error) {
-                alert('Tidak dapat mendapatkan lokasi: ' + error.message);
+                btn.innerHTML = originalContent;
+                alert('Gagal mendapatkan lokasi: ' + error.message);
             }
         );
     } else {
-        alert('Browser tidak mendukung geolocation');
+        alert('Browser Anda tidak mendukung fitur lokasi.');
     }
 }
 
 function selectDelivery(deliveryId) {
-    // Show loading modal
     document.getElementById('loadingModal').classList.remove('hidden');
     
-    // Get delivery details first
     fetch(`/delivery-process/${deliveryId}/details`)
         .then(response => response.json())
         .then(data => {
@@ -271,8 +272,7 @@ function selectDelivery(deliveryId) {
                 return;
             }
             
-            // Confirm selection
-            if (confirm(`Mulai pengantaran untuk ${data.patient.name}?\nAlamat: ${data.address}`)) {
+            if (confirm(`Konfirmasi Pengantaran?\n\nPasien: ${data.patient.name}\nAlamat: ${data.address}\n\nSistem akan mulai melacak waktu perjalanan Anda.`)) {
                 startDeliveryProcess(deliveryId);
             } else {
                 document.getElementById('loadingModal').classList.add('hidden');
@@ -280,7 +280,7 @@ function selectDelivery(deliveryId) {
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Terjadi kesalahan saat mengambil data pengantaran.');
+            alert('Terjadi kesalahan koneksi.');
             document.getElementById('loadingModal').classList.add('hidden');
         });
 }
@@ -299,15 +299,25 @@ function startDeliveryProcess(deliveryId) {
         if (data.success) {
             window.location.href = data.redirect_url;
         } else {
-            alert(data.error || 'Terjadi kesalahan saat memulai pengantaran.');
+            alert(data.error || 'Gagal memproses tugas.');
             document.getElementById('loadingModal').classList.add('hidden');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan saat memulai pengantaran.');
+        alert('Terjadi kesalahan sistem.');
         document.getElementById('loadingModal').classList.add('hidden');
     });
 }
 </script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.5s ease-out forwards;
+    }
+</style>
 @endsection

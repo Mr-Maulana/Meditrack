@@ -221,30 +221,33 @@
     </div>
 
     <!-- Mobile Sidebar -->
-    <div class="mobile-sidebar fixed left-0 top-0 h-screen w-64 bg-white shadow-lg z-50 lg:hidden" id="mobileSidebar">
+    <div class="mobile-sidebar fixed left-0 top-0 h-screen w-64 bg-tni-800 shadow-2xl z-50 lg:hidden transform -translate-x-full transition-transform duration-300" id="mobileSidebar">
         <div class="h-full flex flex-col">
             <!-- Mobile Header -->
-            <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <div class="p-5 border-b border-tni-700/50 flex items-center justify-between bg-tni-900/50">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-pills text-white text-lg"></i>
+                    <div class="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-pills text-tni-900 text-lg"></i>
                     </div>
-                    <h2 class="text-xl font-bold text-gray-800">MediTrack</h2>
+                    <div>
+                        <h2 class="text-lg font-black text-white leading-tight">MediTrack</h2>
+                        <p class="text-[9px] text-gold-400 font-bold uppercase tracking-widest">Rumkit TK III IM</p>
+                    </div>
                 </div>
-                <button onclick="toggleMobileSidebar()" class="text-gray-500">
-                    <i class="fas fa-times"></i>
+                <button onclick="toggleMobileSidebar()" class="w-8 h-8 flex items-center justify-center text-tni-300 hover:text-white hover:bg-tni-700 rounded-full transition-all">
+                    <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
             
             <!-- Mobile Navigation -->
-            <div class="flex-1 overflow-y-auto py-4">
+            <div class="flex-1 overflow-y-auto py-4 px-2">
                 @include('partials.navigation')
             </div>
             
             <!-- Mobile User Info -->
-            <div class="p-4 border-t border-gray-200">
+            <div class="p-5 border-t border-tni-700/50 bg-tni-900/30">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+                    <div class="w-11 h-11 bg-tni-700 rounded-full flex items-center justify-center text-gold-400 font-bold shadow-inner border border-tni-600 overflow-hidden">
                         @if(auth()->user()->profile_photo)
                             <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
                         @else
@@ -252,18 +255,24 @@
                         @endif
                     </div>
                     <div>
-                        <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
-                        <div class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</div>
+                        <div class="text-sm font-bold text-white">{{ auth()->user()->name }}</div>
+                        <div class="text-[10px] text-tni-400 font-bold uppercase flex items-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-gold-500 mr-1.5"></span>
+                            {{ auth()->user()->role }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Mobile Overlay -->
+    <div class="overlay fixed inset-0 bg-tni-900/60 backdrop-blur-sm z-40 hidden" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+
     <!-- Main Content -->
     <div class="main-content min-h-screen flex flex-col" id="mainContent">
         <!-- Top Navigation -->
-        <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200/80 sticky top-0 z-20 transition-all duration-300">
+        <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20 transition-all duration-300">
             <div class="px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
@@ -489,7 +498,7 @@
         
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('mobileSidebar');
-            const overlay = document.getElementById('overlay');
+            const overlay = document.getElementById('sidebarOverlay');
             if (sidebar && overlay) {
                 sidebar.classList.toggle('open');
                 overlay.classList.toggle('active');
@@ -647,7 +656,7 @@
             if (window.innerWidth >= 1024) {
                 // Close mobile sidebar on desktop
                 const mobileSidebar = document.getElementById('mobileSidebar');
-                const overlay = document.getElementById('overlay');
+                const overlay = document.getElementById('sidebarOverlay');
                 if (mobileSidebar && overlay) {
                     mobileSidebar.classList.remove('open');
                     overlay.classList.remove('active');
