@@ -269,52 +269,86 @@
 
     @if($delivery->status != 'pending')
     document.addEventListener('DOMContentLoaded', function() {
-        const hospitalLat = 5.1812;
-        const hospitalLng = 97.1472;
+        try {
+            const hospitalLat = 5.182907;
+            const hospitalLng = 97.149811;
 
-        let destLat = {{ $delivery->latitude ?? 5.1812 }};
-        let destLng = {{ $delivery->longitude ?? 97.1472 }};
-        
-        // Anti-Jakarta Fix (Demo)
-        if (destLat < 0) { destLat = hospitalLat; destLng = hospitalLng; }
-        
-        let courierLat = {{ $delivery->current_latitude ?? ($delivery->latitude ?? 5.1812) }};
-        let courierLng = {{ $delivery->current_longitude ?? ($delivery->longitude ?? 97.1472) }};
-        if (courierLat < 0) { courierLat = hospitalLat; courierLng = hospitalLng; }
+            let dbDestLat = @json($delivery->latitude ?: ($delivery->patient->latitude ?: null));
+            let dbDestLng = @json($delivery->longitude ?: ($delivery->patient->longitude ?: null));
+            let deliveryAddress = @json($delivery->delivery_address);
+            
+            let courierLat = parseFloat(@json($delivery->current_latitude ?: ($delivery->latitude ?: 5.182907)));
+            let courierLng = parseFloat(@json($delivery->current_longitude ?: ($delivery->longitude ?: 97.149811)));
 
-        map = L.map('map', { zoomControl: false }).setView([courierLat, courierLng], 14);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            if (isNaN(courierLat)) courierLat = hospitalLat;
+            if (isNaN(courierLng)) courierLng = hospitalLng;
 
-        const destIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div class="relative w-10 h-10"><div class="absolute inset-0 bg-red-500 rounded-2xl rotate-45 shadow-xl border-4 border-white"></div><div class="absolute inset-0 flex items-center justify-center text-white text-xs"><i class="fas fa-house"></i></div></div>`,
-            iconSize: [40, 40],
-            iconAnchor: [20, 20]
-        });
+            map = L.map('map', { zoomControl: false }).setView([courierLat, courierLng], 14);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
 
-        const courierIcon = L.divIcon({
-            className: 'custom-div-icon',
-            html: `<div class="relative w-12 h-12 courier-marker-icon"><div class="absolute inset-0 bg-tni-800 rounded-2xl shadow-2xl border-4 border-white flex items-center justify-center text-gold-400 text-xl"><i class="fas fa-motorcycle"></i></div><div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white pulse-red"></div></div>`,
-            iconSize: [48, 48],
-            iconAnchor: [24, 24]
-        });
+            const destIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="relative w-10 h-10"><div class="absolute inset-0 bg-red-500 rounded-2xl rotate-45 shadow-xl border-4 border-white"></div><div class="absolute inset-0 flex items-center justify-center text-white text-xs"><i class="fas fa-house"></i></div></div>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20]
+            });
 
-        destinationMarker = L.marker([destLat, destLng], {icon: destIcon}).addTo(map);
-        courierMarker = L.marker([courierLat, courierLng], {icon: courierIcon}).addTo(map);
+            const courierIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="relative w-12 h-12 courier-marker-icon"><div class="absolute inset-0 bg-tni-800 rounded-2xl shadow-2xl border-4 border-white flex items-center justify-center text-gold-400 text-xl"><i class="fas fa-motorcycle"></i></div><div class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white pulse-red"></div></div>`,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
 
-        routingControl = L.Routing.control({
-            waypoints: [L.latLng(courierLat, courierLng), L.latLng(destLat, destLng)],
-            lineOptions: { styles: [{ color: '#254328', opacity: 0.6, weight: 6 }] },
-            createMarker: function() { return null; },
-            addWaypoints: false,
-            routeWhileDragging: false,
-            show: false
-        }).addTo(map);
+            courierMarker = L.marker([courierLat, courierLng], {icon: courierIcon}).addTo(map);
 
-        const group = new L.featureGroup([destinationMarker, courierMarker]);
-        map.fitBounds(group.getBounds().pad(0.3));
+            // Fix for map loading in animated containers
+            setTimeout(() => {
+                map.invalidateSize();
+            }, 600);
 
-        setInterval(refreshCourierLocation, 10000);
+            if (dbDestLat !== null && dbDestLng !== null && !isNaN(parseFloat(dbDestLat))) {
+                setupDestination(parseFloat(dbDestLat), parseFloat(dbDestLng));
+            } else {
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(deliveryAddress + ', Lhokseumawe')}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            setupDestination(parseFloat(data[0].lat), parseFloat(data[0].lon));
+                        } else {
+                            setupDestination(hospitalLat, hospitalLng);
+                        }
+                    })
+                    .catch(() => setupDestination(hospitalLat, hospitalLng));
+            }
+
+            function setupDestination(lat, lng) {
+                destinationMarker = L.marker([lat, lng], {icon: destIcon}).addTo(map);
+
+                try {
+                    routingControl = L.Routing.control({
+                        waypoints: [L.latLng(courierLat, courierLng), L.latLng(lat, lng)],
+                        lineOptions: { styles: [{ color: '#254328', opacity: 0.6, weight: 6 }] },
+                        createMarker: function() { return null; },
+                        addWaypoints: false,
+                        routeWhileDragging: false,
+                        show: false
+                    }).addTo(map);
+                } catch(e) {
+                    console.error("Routing error:", e);
+                }
+
+                const group = new L.featureGroup([destinationMarker, courierMarker]);
+                map.fitBounds(group.getBounds().pad(0.3));
+            }
+
+            setInterval(refreshCourierLocation, 10000);
+        } catch (error) {
+            console.error("Map initialization error:", error);
+            alert("Terjadi kesalahan memuat peta. Silakan muat ulang halaman.");
+        }
     });
 
     function focusCourier() {
@@ -328,10 +362,14 @@
                 if (data.delivery && data.delivery.current_latitude && data.delivery.current_longitude) {
                     const newPos = L.latLng(data.delivery.current_latitude, data.delivery.current_longitude);
                     courierMarker.setLatLng(newPos);
-                    routingControl.setWaypoints([
-                        newPos,
-                        L.latLng(destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng)
-                    ]);
+                    if (destinationMarker && routingControl) {
+                        try {
+                            routingControl.setWaypoints([
+                                newPos,
+                                L.latLng(destinationMarker.getLatLng().lat, destinationMarker.getLatLng().lng)
+                            ]);
+                        } catch(e){}
+                    }
                 }
             })
             .catch(error => console.error('Error:', error));

@@ -137,20 +137,21 @@
             @endif
             
             <!-- Next Steps -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                <h4 class="font-medium text-blue-900 mb-2">Selanjutnya</h4>
-                <p class="text-sm text-blue-700 mb-4">
-                    Pengantaran ini telah tercatat dalam sistem. Anda dapat mengambil pengantaran berikutnya.
-                </p>
-                <div class="flex space-x-3">
-                    <a href="{{ route('delivery-process.index') }}" 
-                       class="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                       <i class="fas fa-truck mr-2"></i> Ambil Pengantaran Baru
-                    </a>
-                    <a href="{{ route('deliveries.index') }}" 
-                       class="flex-1 text-center px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50">
-                       <i class="fas fa-list mr-2"></i> Lihat Semua Pengantaran
-                    </a>
+            <div class="bg-gradient-to-r from-tni-800 to-tni-900 rounded-[2rem] p-8 md:p-10 text-center relative overflow-hidden shadow-2xl mt-4">
+                <div class="absolute -top-4 -right-4 p-8 opacity-10">
+                    <i class="fas fa-truck-fast text-9xl text-white"></i>
+                </div>
+                <div class="relative z-10">
+                    <h4 class="text-xl font-black text-white mb-3 uppercase tracking-widest">Tugas Selesai</h4>
+                    <p class="text-tni-100 font-medium mb-8 text-sm max-w-md mx-auto leading-relaxed">
+                        Pengantaran ini telah sukses dicatat dalam sistem farmasi. Anda dapat melanjutkan untuk mengambil tugas pengantaran berikutnya.
+                    </p>
+                    <div class="flex justify-center">
+                        <a href="{{ route('delivery-process.index') }}" 
+                           class="inline-flex items-center justify-center gap-3 px-10 py-4 bg-gradient-to-r from-gold-400 to-gold-600 text-tni-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-gold-500/20 hover:scale-[1.05] transition-all w-full md:w-auto">
+                           <i class="fas fa-motorcycle text-lg"></i> Ambil Pengantaran Baru
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

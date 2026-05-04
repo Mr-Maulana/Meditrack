@@ -29,7 +29,7 @@
         }
         
         .sidebar.collapsed {
-            width: 70px;
+            width: 88px; /* Slightly wider to prevent padding overflow */
         }
         
         .sidebar.collapsed .nav-text {
@@ -48,6 +48,29 @@
             display: block;
         }
         
+        .sidebar.collapsed .user-info {
+            display: none;
+        }
+
+        .sidebar.collapsed .submenu-icon {
+            display: none;
+        }
+
+        .sidebar.collapsed .submenu {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .sidebar.collapsed .nav-item > div {
+            justify-content: center;
+            margin: 0;
+        }
+        
         .toggle-btn .collapse {
             display: none;
         }
@@ -59,8 +82,8 @@
         }
         
         .main-content.expanded {
-            margin-left: 70px;
-            width: calc(100% - 70px);
+            margin-left: 88px;
+            width: calc(100% - 88px);
         }
         
         .mobile-sidebar {
@@ -484,6 +507,11 @@
             if (sidebar && mainContent) {
                 sidebar.classList.add('collapsed');
                 mainContent.classList.add('expanded');
+                
+                // Automatically close all open submenus when sidebar is collapsed
+                document.querySelectorAll('.submenu.open').forEach(menu => {
+                    menu.classList.remove('open');
+                });
             }
         }
         

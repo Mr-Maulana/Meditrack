@@ -470,19 +470,27 @@
 
     <!-- Welcome Section for Empty Dashboard -->
     @if($patients->count() === 0 && $deliveries->count() === 0)
-    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-8 text-center">
-        <i class="fas fa-rocket text-5xl text-blue-400 mb-4"></i>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Selamat Datang di MediTrack!</h3>
-        <p class="text-gray-600 mb-6">Sistem manajemen pengantaran obat terpadu. Mulai dengan menambahkan pasien pertama Anda.</p>
-        @if(auth()->user()->isAdmin())
-            <a href="{{ route('patients.create') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-plus mr-2"></i> Tambah Pasien Pertama
-            </a>
-        @elseif(auth()->user()->isApoteker())
-            <a href="{{ route('patients.create') }}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-plus mr-2"></i> Tambah Pasien Pertama
-            </a>
-        @endif
+    <div class="bg-gradient-to-br from-tni-800 to-tni-900 rounded-[1.5rem] shadow-lg p-8 md:p-10 text-center relative overflow-hidden border border-tni-700">
+        <div class="absolute top-0 left-0 p-6 opacity-5">
+            <i class="fas fa-hospital-user text-6xl text-white"></i>
+        </div>
+        <div class="absolute bottom-0 right-0 p-6 opacity-10">
+            <i class="fas fa-rocket text-6xl text-gold-400"></i>
+        </div>
+        
+        <div class="relative z-10 max-w-xl mx-auto">
+            <div class="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 text-tni-900 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-5 shadow-lg shadow-gold-500/20 rotate-12 hover:rotate-0 transition-transform duration-500 border-2 border-white">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h3 class="text-2xl font-black text-white mb-3 tracking-tight">Selamat Datang di <span class="text-gold-400">MediTrack!</span></h3>
+            <p class="text-tni-100 text-sm mb-8 leading-relaxed font-medium">Sistem manajemen pengantaran obat terpadu milik Rumkit TK III IM 07.01 Lhokseumawe. Mari mulai dengan mendaftarkan pasien pertama Anda ke dalam sistem.</p>
+            
+            @if(auth()->user()->isAdmin() || auth()->user()->isApoteker())
+                <a href="{{ route('patients.create') }}" class="inline-flex items-center justify-center px-8 py-3.5 bg-gradient-to-r from-gold-400 to-gold-600 text-tni-900 rounded-xl font-black text-xs uppercase tracking-[0.15em] shadow-xl shadow-gold-500/20 hover:scale-[1.03] transition-all">
+                    <i class="fas fa-user-plus mr-2 text-sm"></i> Tambah Pasien Pertama
+                </a>
+            @endif
+        </div>
     </div>
     @endif
 </div>

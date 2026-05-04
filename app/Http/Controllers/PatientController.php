@@ -49,6 +49,8 @@ class PatientController extends Controller
             'email' => 'nullable|email|unique:patients',
             'phone' => 'required|string|unique:patients',
             'address' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female',
             'medical_condition' => 'nullable|string',
@@ -60,6 +62,8 @@ class PatientController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'address' => $request->address,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'date_of_birth' => $request->date_of_birth,
                 'gender' => $request->gender,
                 'medical_condition' => $request->medical_condition,
@@ -100,13 +104,15 @@ class PatientController extends Controller
             'email' => 'nullable|email|unique:patients,email,' . $patient->id,
             'phone' => 'required|string|unique:patients,phone,' . $patient->id,
             'address' => 'required|string',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female',
             'medical_condition' => 'nullable|string',
         ]);
 
         try {
-            $patient->update($request->only(['name', 'email', 'phone', 'address', 'date_of_birth', 'gender', 'medical_condition']));
+            $patient->update($request->only(['name', 'email', 'phone', 'address', 'latitude', 'longitude', 'date_of_birth', 'gender', 'medical_condition']));
 
             Log::info('Patient updated', [
                 'patient_id' => $patient->id,

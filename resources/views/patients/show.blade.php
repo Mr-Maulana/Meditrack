@@ -100,6 +100,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Maps Section -->
+        <div class="p-8 border-t border-gray-100 bg-gray-50/30">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-map-marked-alt text-tni-600"></i> Peta Koordinat Tempat Tinggal
+                </p>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-tni-700 bg-white border border-tni-100 shadow-sm px-3 py-1.5 rounded-lg">
+                        Lat: {{ $patient->latitude ?? 'Kosong' }}
+                    </span>
+                    <span class="text-[10px] font-bold text-tni-700 bg-white border border-tni-100 shadow-sm px-3 py-1.5 rounded-lg">
+                        Lng: {{ $patient->longitude ?? 'Kosong' }}
+                    </span>
+                </div>
+            </div>
+            <div id="patientMap" class="w-full h-64 rounded-2xl border border-gray-200 shadow-inner" style="z-index: 10;"></div>
+            @if(!$patient->latitude || !$patient->longitude)
+                <p class="text-[10px] text-red-500 italic mt-3 font-bold flex items-center gap-1">
+                    <i class="fas fa-exclamation-triangle"></i> Titik koordinat belum diatur. Silakan Edit Data untuk menyesuaikan lokasi peta.
+                </p>
+            @endif
+        </div>
     </div>
 
     <!-- Additional Info (History Placeholder) -->
@@ -151,4 +174,31 @@
         </div>
     </div>
 </div>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let lat = {{ $patient->latitude ?: 5.1812 }};
+    let lng = {{ $patient->longitude ?: 97.1472 }};
+    let hasCoords = {{ ($patient->latitude && $patient->longitude) ? 'true' : 'false' }};
+    
+    let map = L.map('patientMap').setView([lat, lng], hasCoords ? 16 : 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = L.marker([lat, lng]).addTo(map);
+    
+    if (hasCoords) {
+        marker.bindPopup(`
+            <div class="text-center">
+                <strong class="text-tni-800">{{ $patient->name }}</strong><br>
+                <span class="text-xs text-gray-600">{{ $patient->address }}</span>
+            </div>
+        `).openPopup();
+    }
+});
+</script>
 @endsection

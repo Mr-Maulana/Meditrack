@@ -12,9 +12,13 @@ return new class extends Migration
             $table->id();
             $table->string('patient_code')->unique();
             $table->string('name');
+            $table->string('email')->nullable()->unique();
             $table->string('phone');
             $table->text('address');
+            $table->date('date_of_birth');
+            $table->enum('gender', ['male', 'female']);
             $table->text('diagnosis')->nullable();
+            $table->text('medical_condition')->nullable();
             $table->text('allergies')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->timestamps();

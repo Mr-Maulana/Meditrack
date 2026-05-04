@@ -236,7 +236,9 @@
                 p.prescriptions.forEach(pr => {
                     const opt = document.createElement('option');
                     opt.value = pr.id;
-                    opt.textContent = `RESEP: ${pr.medication_name} (${new Date(pr.created_at).toLocaleDateString()})`;
+                    const dateObj = new Date(pr.created_at);
+                    const formattedDate = dateObj.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'});
+                    opt.textContent = `Resep - ${formattedDate}`;
                     sel.appendChild(opt);
                 });
                 cont.classList.remove('hidden');

@@ -90,9 +90,23 @@
                     <div class="space-y-6">
                         <div>
                             <label for="address" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Alamat Domisili <span class="text-red-500">*</span></label>
-                            <textarea id="address" name="address" rows="3" required 
-                                class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner"
-                                placeholder="Alamat lengkap pengiriman...">{{ old('address', $patient->address) }}</textarea>
+                            <div class="flex gap-2">
+                                <textarea id="address" name="address" rows="3" required 
+                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner"
+                                    placeholder="Alamat lengkap pengiriman...">{{ old('address', $patient->address) }}</textarea>
+                                <button type="button" id="btnGeocode" class="px-4 bg-tni-800 text-white rounded-2xl hover:bg-black transition flex flex-col items-center justify-center gap-1 shadow-lg shrink-0">
+                                    <i class="fas fa-search-location"></i>
+                                    <span class="text-[8px] uppercase tracking-wider font-bold">Cari Map</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Peta Lokasi Otomatis</label>
+                            <div id="patientMap" class="w-full h-48 rounded-2xl border border-gray-200 shadow-inner mb-2" style="z-index: 10;"></div>
+                            <p class="text-[9px] text-gray-400 italic font-bold">*Titik peta akan otomatis diperbarui saat Anda selesai mengisi alamat (berpindah kolom) atau menekan tombol Cari Map.</p>
+                            <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $patient->latitude) }}">
+                            <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $patient->longitude) }}">
                         </div>
 
                         <div>
@@ -117,4 +131,64 @@
         </form>
     </div>
 </div>
+
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let latInput = document.getElementById('latitude');
+    let lngInput = document.getElementById('longitude');
+    let addressInput = document.getElementById('address');
+    let btnGeocode = document.getElementById('btnGeocode');
+
+    let initialLat = latInput.value ? parseFloat(latInput.value) : 5.1812;
+    let initialLng = lngInput.value ? parseFloat(lngInput.value) : 97.1472;
+    
+    let map = L.map('patientMap').setView([initialLat, initialLng], latInput.value ? 16 : 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
+
+    // Update hidden inputs when marker is dragged
+    marker.on('dragend', function(e) {
+        let pos = marker.getLatLng();
+        latInput.value = pos.lat;
+        lngInput.value = pos.lng;
+    });
+
+    function geocodeCurrentAddress() {
+        let addr = addressInput.value.trim();
+        if(addr.length > 5) {
+            let btnOriginalHtml = btnGeocode.innerHTML;
+            btnGeocode.innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
+            
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ', Lhokseumawe')}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        let lat = parseFloat(data[0].lat);
+                        let lng = parseFloat(data[0].lon);
+                        map.setView([lat, lng], 16);
+                        marker.setLatLng([lat, lng]);
+                        latInput.value = lat;
+                        lngInput.value = lng;
+                    }
+                    btnGeocode.innerHTML = btnOriginalHtml;
+                })
+                .catch(() => {
+                    btnGeocode.innerHTML = btnOriginalHtml;
+                });
+        }
+    }
+
+    // Auto-geocode when leaving the address field
+    addressInput.addEventListener('blur', geocodeCurrentAddress);
+    
+    // Also geocode when clicking the button
+    btnGeocode.addEventListener('click', geocodeCurrentAddress);
+});
+</script>
 @endsection

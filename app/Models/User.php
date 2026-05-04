@@ -99,7 +99,7 @@ class User extends Authenticatable
     // Relationships
     public function patients()
     {
-        return $this->hasMany(Patient::class);
+        return $this->hasMany(Patient::class, 'created_by');
     }
 
     public function deliveries()

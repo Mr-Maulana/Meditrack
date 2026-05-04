@@ -149,7 +149,7 @@
                 </div>
                 
                 <div class="pt-4 border-t border-gray-100">
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assessment->delivery->latitude }},{{ $assessment->delivery->longitude }}" 
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($assessment->delivery->delivery_address) }}" 
                        target="_blank"
                        class="flex items-center justify-center gap-3 w-full py-3 bg-white border-2 border-gold-500 text-gold-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold-50 transition-all">
                         <i class="fas fa-location-arrow"></i>
@@ -258,23 +258,53 @@ let routePolyline;
 let currentLocationMarker;
 let destinationMarker;
 let currentLocation = null;
-let destination = {
-    lat: {{ $assessment->delivery->latitude && $assessment->delivery->latitude > 0 ? $assessment->delivery->latitude : 5.1812 }},
-    lng: {{ $assessment->delivery->longitude && $assessment->delivery->latitude > 0 ? $assessment->delivery->longitude : 97.1472 }}
-};
+let destLat = @json($assessment->delivery->latitude ?: ($assessment->delivery->patient->latitude ?: null));
+let destLng = @json($assessment->delivery->longitude ?: ($assessment->delivery->patient->longitude ?: null));
+let deliveryAddress = @json($assessment->delivery->delivery_address);
+let destination = null;
+
 let routeInterval;
 let countdownInterval;
 let estimatedMinutes = 0;
 let distanceKm = 0;
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (destLat !== null && destLng !== null) {
+        destination = { lat: destLat, lng: destLng };
+        initializeTracking();
+    } else {
+        // Geocode the address using Nominatim (OpenStreetMap) if coordinates are missing
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(deliveryAddress + ', Lhokseumawe')}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    destination = {
+                        lat: parseFloat(data[0].lat),
+                        lng: parseFloat(data[0].lon)
+                    };
+                } else {
+                    // Fallback to Lhokseumawe center if address not found
+                    destination = { lat: 5.1812, lng: 97.1472 };
+                    console.log("Alamat spesifik tidak ditemukan di map, menggunakan default Lhokseumawe.");
+                }
+                initializeTracking();
+            })
+            .catch(err => {
+                console.error('Geocoding error:', err);
+                destination = { lat: 5.1812, lng: 97.1472 };
+                initializeTracking();
+            });
+    }
+});
+
+function initializeTracking() {
     initializeMap();
     startDelivery();
     startLocationTracking();
     
     // Show instructions on first load
     setTimeout(toggleInstructions, 1000);
-});
+}
 
 function toggleInstructions() {
     document.getElementById('instructionModal').classList.toggle('hidden');
@@ -314,22 +344,13 @@ function startDelivery() {
 }
 
 function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                currentLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                updateLocationOnMap();
-                calculateRoute();
-            },
-            function(error) {
-                console.error('Location Error:', error);
-            },
-            { enableHighAccuracy: true }
-        );
-    }
+    // Locked location as requested
+    currentLocation = {
+        lat: 5.182907239056203,
+        lng: 97.14981118058444
+    };
+    updateLocationOnMap();
+    calculateRoute();
 }
 
 function updateLocationOnMap() {

@@ -239,25 +239,16 @@ function getCurrentLocation() {
     const originalContent = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Mencari...';
     
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                currentLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-                btn.innerHTML = originalContent;
-                btn.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
-                alert(`Lokasi Berhasil Ditemukan!\nLatitude: ${currentLocation.lat.toFixed(6)}\nLongitude: ${currentLocation.lng.toFixed(6)}`);
-            },
-            function(error) {
-                btn.innerHTML = originalContent;
-                alert('Gagal mendapatkan lokasi: ' + error.message);
-            }
-        );
-    } else {
-        alert('Browser Anda tidak mendukung fitur lokasi.');
-    }
+    // Locked location as requested
+    setTimeout(() => {
+        currentLocation = {
+            lat: 5.182907239056203,
+            lng: 97.14981118058444
+        };
+        btn.innerHTML = originalContent;
+        btn.classList.add('bg-green-50', 'text-green-700', 'border-green-200');
+        alert(`Lokasi Berhasil Ditemukan (Dikunci ke RS)!\nLatitude: ${currentLocation.lat.toFixed(6)}\nLongitude: ${currentLocation.lng.toFixed(6)}\n\nJl. Samudera No.53A, Kp Jawa, Kec. Banda Sakti, Kota Lhokseumawe, Aceh 24314`);
+    }, 500); // Simulate network delay
 }
 
 function selectDelivery(deliveryId) {
