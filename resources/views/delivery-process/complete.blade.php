@@ -64,7 +64,7 @@
                         </div>
                         <div class="flex-1">
                             <div class="font-medium text-gray-900">Dimulai</div>
-                            <div class="text-sm text-gray-500">{{ $assessment->start_time->format('H:i') }}</div>
+                            <div class="text-sm text-gray-500">{{ $assessment->start_time ? $assessment->start_time->format('H:i') : '-' }}</div>
                         </div>
                     </div>
                     
@@ -74,7 +74,7 @@
                         </div>
                         <div class="flex-1">
                             <div class="font-medium text-gray-900">Tiba di Lokasi</div>
-                            <div class="text-sm text-gray-500">{{ $assessment->arrival_time->format('H:i') }}</div>
+                            <div class="text-sm text-gray-500">{{ $assessment->arrival_time ? $assessment->arrival_time->format('H:i') : '-' }}</div>
                             @if($assessment->travel_time_minutes)
                             <div class="text-xs text-gray-400">Perjalanan: {{ $assessment->travel_time_minutes }} menit</div>
                             @endif
@@ -87,7 +87,7 @@
                         </div>
                         <div class="flex-1">
                             <div class="font-medium text-gray-900">Selesai</div>
-                            <div class="text-sm text-gray-500">{{ $assessment->handover_time->format('H:i') }}</div>
+                            <div class="text-sm text-gray-500">{{ $assessment->handover_time ? $assessment->handover_time->format('H:i') : '-' }}</div>
                             @if($assessment->handover_time_minutes)
                             <div class="text-xs text-gray-400">Serah terima: {{ $assessment->handover_time_minutes }} menit</div>
                             @endif

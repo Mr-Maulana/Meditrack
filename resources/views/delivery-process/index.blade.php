@@ -105,12 +105,14 @@
                                 <p class="text-[10px] font-bold text-gold-400 uppercase tracking-widest mb-3">Daftar Obat Pasien:</p>
                                 <div class="flex flex-wrap gap-2">
                                     @php
-                                        $meds = $delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name]];
+                                        $meds = $delivery->prescription
+                                            ? ($delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name ?? 'Obat']])
+                                            : [];
                                     @endphp
                                     @foreach($meds as $med)
                                     <div class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2">
                                         <i class="fas fa-pills text-[10px] text-gold-500"></i>
-                                        <span class="text-xs font-bold text-white">{{ $med['name'] }}</span>
+                                        <span class="text-xs font-bold text-white">{{ $med['name'] ?? '-' }}</span>
                                     </div>
                                     @endforeach
                                 </div>
@@ -181,12 +183,14 @@
                     <div class="p-3 bg-blue-50/50 rounded-2xl border border-blue-100/50">
                         <p class="text-[9px] font-bold text-blue-800 uppercase tracking-widest mb-2">Daftar Obat:</p>
                         @php
-                            $meds = $delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name]];
+                            $meds = $delivery->prescription
+                                ? ($delivery->prescription->medications ?? [['name' => $delivery->prescription->medication_name ?? 'Obat']])
+                                : [];
                         @endphp
                         <div class="flex flex-wrap gap-1.5">
                             @foreach(array_slice($meds, 0, 3) as $med)
                             <span class="text-[10px] bg-white border border-blue-100 text-blue-700 px-2 py-0.5 rounded-lg font-bold">
-                                {{ $med['name'] }}
+                                {{ $med['name'] ?? '-' }}
                             </span>
                             @endforeach
                             @if(count($meds) > 3)

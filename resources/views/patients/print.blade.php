@@ -53,6 +53,17 @@
             font-weight: black;
             display: block;
         }
+        .section {
+            margin-top: 3mm;
+            border-top: 1px dashed #000;
+            padding-top: 2mm;
+        }
+        .section-title {
+            font-size: 8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 1.5mm;
+        }
         .footer {
             text-align: center;
             border-top: 1px solid #000;
@@ -90,16 +101,32 @@
                 <span class="value">{{ strtoupper($patient->name) }}</span>
             </div>
             <div class="field">
-                <span class="label">NOMOR RM:</span>
+                <span class="label">NOMOR PENGANTARAN:</span>
                 <span class="value">{{ $patient->patient_code ?? 'MT-'.str_pad($patient->id, 5, '0', STR_PAD_LEFT) }}</span>
             </div>
-            <div class="field">
-                <span class="label">TGL LAHIR:</span>
-                <span class="value">{{ $patient->date_of_birth ? $patient->date_of_birth->format('d/m/Y') : '-' }}</span>
+
+            <div class="section">
+                <div class="section-title">Informasi Personal</div>
+                <div class="field">
+                    <span class="label">Jenis Kelamin:</span>
+                    <span class="value">{{ $patient->gender == 'male' ? 'Laki-laki' : 'Perempuan' }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Tanggal Lahir:</span>
+                    <span class="value">{{ $patient->date_of_birth ? $patient->date_of_birth->format('d/m/Y') : '-' }}</span>
+                </div>
             </div>
-            <div class="field">
-                <span class="label">JENIS KELAMIN:</span>
-                <span class="value">{{ $patient->gender == 'male' ? 'LAKI-LAKI' : 'PEREMPUAN' }}</span>
+
+            <div class="section">
+                <div class="section-title">Kontak & Alamat</div>
+                <div class="field">
+                    <span class="label">Telepon:</span>
+                    <span class="value">{{ $patient->phone ?? '-' }}</span>
+                </div>
+                <div class="field">
+                    <span class="label">Alamat Tinggal:</span>
+                    <span class="value" style="font-size: 9pt; font-weight: normal; line-height: 1.2;">{{ $patient->address ?? '-' }}</span>
+                </div>
             </div>
         </div>
 

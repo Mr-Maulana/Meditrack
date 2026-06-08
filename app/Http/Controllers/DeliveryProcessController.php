@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Delivery;
 use App\Models\DeliveryAssessment;
+use App\Models\User;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\DeliveryStatusUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +24,9 @@ class DeliveryProcessController extends Controller
         }
 
         $availableDeliveries = Delivery::with(['patient', 'assessment'])
-            ->where('courier_id', $user->id)
+            ->when(!$user->isAdmin(), function ($query) use ($user) {
+                return $query->where('courier_id', $user->id);
+            })
             ->whereIn('status', ['pending', 'on_delivery'])
             ->whereDoesntHave('assessment', function ($query) {
                 $query->where('assessment_status', 'in_progress');
@@ -30,7 +35,9 @@ class DeliveryProcessController extends Controller
             ->get();
 
         $inProgressDeliveries = Delivery::with(['patient', 'assessment'])
-            ->where('courier_id', $user->id)
+            ->when(!$user->isAdmin(), function ($query) use ($user) {
+                return $query->where('courier_id', $user->id);
+            })
             ->whereHas('assessment', function ($query) {
                 $query->where('assessment_status', 'in_progress');
             })
@@ -49,7 +56,8 @@ class DeliveryProcessController extends Controller
         try {
             $delivery = Delivery::findOrFail($request->delivery_id);
             
-            if ($delivery->courier_id !== Auth::id()) {
+            $user = Auth::user();
+        if ($delivery->courier_id !== Auth::id() && !$user->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Anda tidak ditugaskan untuk pengantaran ini.'
@@ -73,7 +81,7 @@ class DeliveryProcessController extends Controller
             $assessment = DeliveryAssessment::updateOrCreate(
                 ['delivery_id' => $delivery->id],
                 [
-                    'courier_id' => Auth::id(),
+                    'courier_id' => $delivery->courier_id ?? Auth::id(),
                     'start_time' => now(),
                     'assessment_status' => 'in_progress',
                 ]
@@ -112,7 +120,7 @@ class DeliveryProcessController extends Controller
             $assessment = DeliveryAssessment::with(['delivery.patient'])
                 ->findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            if ($assessment->courier_id !== Auth::id() && !Auth::user()->isAdmin()) {
                 abort(403, 'Anda tidak memiliki akses ke pengantaran ini.');
             }
 
@@ -136,7 +144,7 @@ class DeliveryProcessController extends Controller
         try {
             $assessment = DeliveryAssessment::findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            if ($assessment->courier_id !== Auth::id() && !Auth::user()->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Unauthorized'
@@ -179,7 +187,7 @@ class DeliveryProcessController extends Controller
         try {
             $assessment = DeliveryAssessment::with('delivery')->findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            if ($assessment->courier_id !== Auth::id() && !Auth::user()->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Unauthorized'
@@ -214,7 +222,7 @@ class DeliveryProcessController extends Controller
         try {
             $assessment = DeliveryAssessment::findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            if ($assessment->courier_id !== Auth::id() && !Auth::user()->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Unauthorized'
@@ -255,7 +263,8 @@ class DeliveryProcessController extends Controller
             $assessment = DeliveryAssessment::with(['delivery.patient', 'delivery.prescription'])
                 ->findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            $user = Auth::user();
+            if ($assessment->courier_id !== Auth::id() && !$user->isAdmin()) {
                 abort(403, 'Anda tidak memiliki akses ke pengantaran ini.');
             }
 
@@ -292,7 +301,8 @@ class DeliveryProcessController extends Controller
             $assessment = DeliveryAssessment::with('delivery')->findOrFail($assessmentId);
             
             // Authorization check
-            if ($assessment->delivery->courier_id !== Auth::id()) {
+            $user = Auth::user();
+            if ($assessment->delivery->courier_id !== Auth::id() && !$user->isAdmin()) {
                 Log::warning('Unauthorized assessment submission attempt', [
                     'assessment_id' => $assessmentId,
                     'user_id' => Auth::id(),
@@ -352,6 +362,14 @@ class DeliveryProcessController extends Controller
                 'proof_image' => $photoPath,
             ]);
 
+            // Notify admins and apotekers about courier status update
+            try {
+                $admins = User::whereIn('role', ['admin', 'apoteker'])->get();
+                Notification::send($admins, new DeliveryStatusUpdated($assessment->delivery));
+            } catch (\Exception $ne) {
+                Log::error('Failed to send notification for completed delivery', ['error' => $ne->getMessage()]);
+            }
+
             Log::info('Assessment submitted successfully', [
                 'assessment_id' => $assessmentId,
                 'courier_id' => Auth::id(),
@@ -390,7 +408,8 @@ class DeliveryProcessController extends Controller
         try {
             $assessment = DeliveryAssessment::with(['delivery.patient'])->findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            $user = Auth::user();
+            if ($assessment->courier_id !== Auth::id() && !$user->isAdmin()) {
                 abort(403, 'Anda tidak memiliki akses ke pengantaran ini.');
             }
 
@@ -414,15 +433,24 @@ class DeliveryProcessController extends Controller
         try {
             $assessment = DeliveryAssessment::with('delivery')->findOrFail($assessmentId);
             
-            if ($assessment->courier_id !== Auth::id()) {
+            if ($assessment->courier_id !== Auth::id() && !Auth::user()->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Unauthorized'
                 ], 403);
             }
 
-            $assessment->delivery->update(['status' => 'pending']);
+            $delivery = $assessment->delivery;
+            $delivery->update(['status' => 'pending']);
             $assessment->delete();
+
+            // Notify admins and apotekers about courier status update (cancelled/pending)
+            try {
+                $admins = User::whereIn('role', ['admin', 'apoteker'])->get();
+                Notification::send($admins, new DeliveryStatusUpdated($delivery));
+            } catch (\Exception $ne) {
+                Log::error('Failed to send notification for cancelled delivery', ['error' => $ne->getMessage()]);
+            }
 
             Log::info('Delivery cancelled', [
                 'assessment_id' => $assessmentId,
@@ -451,8 +479,9 @@ class DeliveryProcessController extends Controller
     {
         try {
             $delivery = Delivery::with(['patient', 'prescription'])->findOrFail($deliveryId);
+            $user = Auth::user();
             
-            if ($delivery->courier_id !== Auth::id()) {
+            if ($delivery->courier_id !== Auth::id() && !$user->isAdmin()) {
                 return response()->json([
                     'success' => false,
                     'error' => 'Unauthorized'
@@ -614,7 +643,8 @@ class DeliveryProcessController extends Controller
     {
         $user = Auth::user();
         
-        if (!$user->isKurir()) {
+
+        if (!$user->isKurir() && !$user->isAdmin()) {
             abort(403, 'Hanya kurir yang dapat mengakses halaman ini.');
         }
 
@@ -637,8 +667,7 @@ class DeliveryProcessController extends Controller
     public function myDeliveryDetail($deliveryId)
     {
         $user = Auth::user();
-        
-        if (!$user->isKurir()) {
+        if (!$user->isKurir() && !$user->isAdmin()) {
             abort(403, 'Hanya kurir yang dapat mengakses halaman ini.');
         }
 

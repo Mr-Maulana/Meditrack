@@ -108,4 +108,37 @@ class Patient extends Model
     {
         return $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
     }
+
+    // Dynamic geographic accessors
+    public function getProvinceAttribute()
+    {
+        $parts = explode(', ', $this->address);
+        return isset($parts[3]) ? trim($parts[3]) : '';
+    }
+
+    public function getCityAttribute()
+    {
+        $parts = explode(', ', $this->address);
+        return isset($parts[2]) ? trim($parts[2]) : '';
+    }
+
+    public function getSubdistrictAttribute()
+    {
+        $parts = explode(', ', $this->address);
+        if (!isset($parts[1])) {
+            return '';
+        }
+        $sub = trim($parts[1]);
+        return preg_replace('/^kecamatan\s+/i', '', $sub);
+    }
+
+    public function getVillageAttribute()
+    {
+        $parts = explode(', ', $this->address);
+        if (!isset($parts[0])) {
+            return '';
+        }
+        $vil = trim($parts[0]);
+        return preg_replace('/^(desa|kelurahan|gampong)\s+/i', '', $vil);
+    }
 }

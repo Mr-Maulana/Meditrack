@@ -25,7 +25,7 @@
             </div>
         </div>
 
-        <form action="{{ route('patients.update', $patient) }}" method="POST" class="p-10">
+        <form id="patientForm" action="{{ route('patients.update', $patient) }}" method="POST" class="p-10">
             @csrf
             @method('PUT')
             
@@ -88,23 +88,43 @@
                     </h3>
 
                     <div class="space-y-6">
-                        <div>
-                            <label for="address" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Alamat Domisili <span class="text-red-500">*</span></label>
-                            <div class="flex gap-2">
-                                <textarea id="address" name="address" rows="3" required 
-                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner"
-                                    placeholder="Alamat lengkap pengiriman...">{{ old('address', $patient->address) }}</textarea>
-                                <button type="button" id="btnGeocode" class="px-4 bg-tni-800 text-white rounded-2xl hover:bg-black transition flex flex-col items-center justify-center gap-1 shadow-lg shrink-0">
-                                    <i class="fas fa-search-location"></i>
-                                    <span class="text-[8px] uppercase tracking-wider font-bold">Cari Map</span>
-                                </button>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div>
+                                <label for="province" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Provinsi</label>
+                                <select id="province" name="province" required
+                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner appearance-none">
+                                    <option value="">Pilih provinsi...</option>
+                                </select>
+                                <p id="provinceError" class="mt-2 text-[10px] text-red-600 font-bold hidden">Gagal memuat provinsi.</p>
+                            </div>
+                            <div>
+                                <label for="city" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Kota / Kabupaten</label>
+                                <select id="city" name="city" required disabled
+                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner appearance-none">
+                                    <option value="">Pilih kota atau kabupaten...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="subdistrict" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Kecamatan</label>
+                                <select id="subdistrict" name="subdistrict" required disabled
+                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner appearance-none">
+                                    <option value="">Pilih kecamatan...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="village" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Desa / Kelurahan</label>
+                                <select id="village" name="village" required disabled
+                                    class="w-full px-5 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner appearance-none">
+                                    <option value="">Pilih desa atau kelurahan...</option>
+                                </select>
                             </div>
                         </div>
 
                         <div class="mt-4">
                             <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Peta Lokasi Otomatis</label>
                             <div id="patientMap" class="w-full h-48 rounded-2xl border border-gray-200 shadow-inner mb-2" style="z-index: 10;"></div>
-                            <p class="text-[9px] text-gray-400 italic font-bold">*Titik peta akan otomatis diperbarui saat Anda selesai mengisi alamat (berpindah kolom) atau menekan tombol Cari Map.</p>
+                            <p class="text-[9px] text-gray-400 italic font-bold">*Pilih provinsi terlebih dahulu, lalu kota, kecamatan, dan desa untuk mempersempit lokasi secara otomatis.</p>
+                            <input type="hidden" id="address" name="address" value="{{ old('address', $patient->address) }}">
                             <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $patient->latitude) }}">
                             <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $patient->longitude) }}">
                         </div>
@@ -137,20 +157,40 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let latInput = document.getElementById('latitude');
-    let lngInput = document.getElementById('longitude');
-    let addressInput = document.getElementById('address');
-    let btnGeocode = document.getElementById('btnGeocode');
-
-    let initialLat = latInput.value ? parseFloat(latInput.value) : 5.1812;
-    let initialLng = lngInput.value ? parseFloat(lngInput.value) : 97.1472;
+    let defaultLat = 5.1812;
+    let defaultLng = 97.1472;
     
-    let map = L.map('patientMap').setView([initialLat, initialLng], latInput.value ? 16 : 13);
+    let map = L.map('patientMap').setView([defaultLat, defaultLng], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap'
     }).addTo(map);
 
-    let marker = L.marker([initialLat, initialLng], {draggable: true}).addTo(map);
+    let marker = L.marker([defaultLat, defaultLng], {draggable: true}).addTo(map);
+
+    let patientForm = document.getElementById('patientForm');
+    let addressInput = document.getElementById('address');
+    let latInput = document.getElementById('latitude');
+    let lngInput = document.getElementById('longitude');
+    let villageSelect = document.getElementById('village');
+    let subdistrictSelect = document.getElementById('subdistrict');
+    let citySelect = document.getElementById('city');
+    let provinceSelect = document.getElementById('province');
+    let provinceError = document.getElementById('provinceError');
+
+    let initialValues = {
+        province: '{{ old('province', $patient->province ?? '') }}',
+        city: '{{ old('city', $patient->city ?? '') }}',
+        subdistrict: '{{ old('subdistrict', $patient->subdistrict ?? '') }}',
+        village: '{{ old('village', $patient->village ?? '') }}'
+    };
+
+    // Init from old input if exists
+    if(latInput.value && lngInput.value) {
+        let lat = parseFloat(latInput.value);
+        let lng = parseFloat(lngInput.value);
+        map.setView([lat, lng], 16);
+        marker.setLatLng([lat, lng]);
+    }
 
     // Update hidden inputs when marker is dragged
     marker.on('dragend', function(e) {
@@ -159,14 +199,289 @@ document.addEventListener('DOMContentLoaded', function() {
         lngInput.value = pos.lng;
     });
 
+    function normalizeAddress(addr) {
+        return addr.replace(/\s+/g, ' ').trim();
+    }
+
+    function formatRegionName(name) {
+        if (!name) return '';
+        return name
+            .toLowerCase()
+            .split(' ')
+            .map(word => {
+                if (word === 'kota' || word === 'kabupaten' || word === 'kecamatan' || word === 'desa' || word === 'kelurahan' || word === 'gampong') {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            })
+            .join(' ');
+    }
+
+    function appendOptions(select, items, selectedValue, placeholder) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        items.forEach(item => {
+            let formatted = formatRegionName(item.name);
+            let opt = document.createElement('option');
+            opt.value = formatted;
+            opt.textContent = formatted;
+            opt.dataset.id = item.id;
+            if (selectedValue && normalizeAddress(selectedValue).toLowerCase() === normalizeAddress(formatted).toLowerCase()) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+        select.disabled = false;
+    }
+
+    function clearSelect(select, placeholder) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        select.disabled = true;
+    }
+
+    function setLoading(select, placeholder) {
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        select.disabled = true;
+    }
+
+    function fetchJson(url) {
+        return fetch(url).then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            return res.json();
+        });
+    }
+
+    function selectOptionByName(select, name) {
+        if (!name) return false;
+        let normalizedName = normalizeAddress(name).toLowerCase();
+        let matched = Array.from(select.options).find(opt => normalizeAddress(opt.textContent).toLowerCase() === normalizedName);
+        if (matched) {
+            matched.selected = true;
+            return true;
+        }
+        return false;
+    }
+
+    function loadProvinces() {
+        provinceError.classList.add('hidden');
+        setLoading(provinceSelect, 'Memuat provinsi...');
+        setLoading(citySelect, 'Pilih kota atau kabupaten...');
+        setLoading(subdistrictSelect, 'Pilih kecamatan...');
+        setLoading(villageSelect, 'Pilih desa atau kelurahan...');
+
+        fetchJson('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+            .then(provinces => {
+                appendOptions(provinceSelect, provinces, initialValues.province, 'Pilih provinsi...');
+                if (initialValues.province && selectOptionByName(provinceSelect, initialValues.province)) {
+                    let provinceId = provinceSelect.selectedOptions[0]?.dataset.id;
+                    if (provinceId) {
+                        loadRegencies(provinceId, initialValues.city);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Gagal memuat provinsi:', err);
+                clearSelect(provinceSelect, 'Gagal memuat provinsi');
+                provinceError.textContent = 'Gagal memuat provinsi. Silakan refresh halaman atau coba lagi nanti.';
+                provinceError.classList.remove('hidden');
+            });
+    }
+
+    function loadRegencies(provinceId, selectedCityName = null) {
+        setLoading(citySelect, 'Memuat kota atau kabupaten...');
+        clearSelect(subdistrictSelect, 'Pilih kecamatan...');
+        clearSelect(villageSelect, 'Pilih desa atau kelurahan...');
+
+        fetchJson(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
+            .then(regencies => {
+                appendOptions(citySelect, regencies, selectedCityName || initialValues.city, 'Pilih kota atau kabupaten...');
+                if (selectedCityName && selectOptionByName(citySelect, selectedCityName)) {
+                    let regencyId = citySelect.selectedOptions[0]?.dataset.id;
+                    if (regencyId) {
+                        loadDistricts(regencyId, initialValues.subdistrict);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Gagal memuat kota/kabupaten:', err);
+                clearSelect(citySelect, 'Gagal memuat kota/kabupaten');
+            });
+    }
+
+    function loadDistricts(regencyId, selectedSubdistrictName = null) {
+        setLoading(subdistrictSelect, 'Memuat kecamatan...');
+        clearSelect(villageSelect, 'Pilih desa atau kelurahan...');
+
+        fetchJson(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`)
+            .then(districts => {
+                appendOptions(subdistrictSelect, districts, selectedSubdistrictName || initialValues.subdistrict, 'Pilih kecamatan...');
+                if (selectedSubdistrictName && selectOptionByName(subdistrictSelect, selectedSubdistrictName)) {
+                    let districtId = subdistrictSelect.selectedOptions[0]?.dataset.id;
+                    if (districtId) {
+                        loadVillages(districtId, initialValues.village);
+                    }
+                }
+            })
+            .catch(err => {
+                console.error('Gagal memuat kecamatan:', err);
+                clearSelect(subdistrictSelect, 'Gagal memuat kecamatan');
+            });
+    }
+
+    function loadVillages(districtId, selectedVillageName = null) {
+        setLoading(villageSelect, 'Memuat desa atau kelurahan...');
+
+        fetchJson(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`)
+            .then(villages => {
+                appendOptions(villageSelect, villages, selectedVillageName || initialValues.village, 'Pilih desa atau kelurahan...');
+            })
+            .catch(err => {
+                console.error('Gagal memuat desa/kelurahan:', err);
+                clearSelect(villageSelect, 'Gagal memuat desa/kelurahan');
+            });
+    }
+
+    function getSelectText(select) {
+        return select.value ? normalizeAddress(select.value) : '';
+    }
+
+    function formatAddressComponent(value, type) {
+        if (!value) return '';
+        value = normalizeAddress(value);
+
+        if (type === 'village') {
+            if (/^(desa|kelurahan|gampong)\s+/i.test(value)) {
+                return value;
+            }
+            return `Desa ${value}`;
+        }
+
+        if (type === 'subdistrict') {
+            if (/^kecamatan\s+/i.test(value)) {
+                return value;
+            }
+            return `Kecamatan ${value}`;
+        }
+
+        return value;
+    }
+
+    function getAddressComponentRaw(value) {
+        if (!value) return '';
+        value = normalizeAddress(value);
+        return value.replace(/^(desa|kelurahan|gampong|kecamatan)\s+/i, '').trim();
+    }
+
+    function buildAddressString() {
+        let village = formatAddressComponent(getSelectText(villageSelect), 'village');
+        let subdistrict = formatAddressComponent(getSelectText(subdistrictSelect), 'subdistrict');
+        let city = getSelectText(citySelect);
+        let province = getSelectText(provinceSelect);
+
+        let components = [];
+        if (village) components.push(village);
+        if (subdistrict) components.push(subdistrict);
+        if (city) components.push(city);
+        if (province) components.push(province);
+
+        return components.filter(Boolean).join(', ');
+    }
+
+    function updateHiddenAddress() {
+        if (addressInput) {
+            addressInput.value = buildAddressString();
+        }
+    }
+
+    function buildGeocodeQueries() {
+        let village = formatAddressComponent(getSelectText(villageSelect), 'village');
+        let villageRaw = getAddressComponentRaw(getSelectText(villageSelect));
+        let subdistrict = formatAddressComponent(getSelectText(subdistrictSelect), 'subdistrict');
+        let subdistrictRaw = getAddressComponentRaw(getSelectText(subdistrictSelect));
+        let city = getSelectText(citySelect);
+        let province = getSelectText(provinceSelect);
+
+        let queries = [];
+
+        // When village is selected, Nominatim typically doesn't have village-level data
+        // so we focus on subdistrict level and above
+        if (village && subdistrict && city && province) {
+            queries.push(`${subdistrict}, ${city}, ${province}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${city}, ${province}, Indonesia`);
+            queries.push(`${subdistrict}, ${province}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${province}, Indonesia`);
+            queries.push(`${city}, ${province}, Indonesia`);
+        } else if (village && subdistrict && city) {
+            queries.push(`${subdistrict}, ${city}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${city}, Indonesia`);
+            queries.push(`${city}, Indonesia`);
+        } else if (village && subdistrict) {
+            queries.push(`${subdistrict}, Indonesia`);
+            queries.push(`${subdistrictRaw}, Indonesia`);
+        } else if (village && city && province) {
+            queries.push(`${city}, ${province}, Indonesia`);
+        } else if (village && city) {
+            queries.push(`${city}, Indonesia`);
+        } else if (village && province) {
+            queries.push(`${province}, Indonesia`);
+        } else if (village) {
+            queries.push(`${village}, Indonesia`);
+            queries.push(`${villageRaw}, Indonesia`);
+        } else if (subdistrict && city && province) {
+            queries.push(`${subdistrict}, ${city}, ${province}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${city}, ${province}, Indonesia`);
+            queries.push(`${subdistrict}, ${province}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${province}, Indonesia`);
+        } else if (subdistrict && city) {
+            queries.push(`${subdistrict}, ${city}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${city}, Indonesia`);
+        } else if (subdistrict && province) {
+            queries.push(`${subdistrict}, ${province}, Indonesia`);
+            queries.push(`${subdistrictRaw}, ${province}, Indonesia`);
+        } else if (subdistrict) {
+            queries.push(`${subdistrict}, Indonesia`);
+            queries.push(`${subdistrictRaw}, Indonesia`);
+        } else if (city && province) {
+            queries.push(`${city}, ${province}, Indonesia`);
+        } else if (city) {
+            queries.push(`${city}, Indonesia`);
+        } else if (province) {
+            queries.push(`${province}, Indonesia`);
+        }
+
+        return Array.from(new Set(queries.filter(q => q)));
+    }
+
+    function shouldGeocode() {
+        return villageSelect.value || subdistrictSelect.value || citySelect.value || provinceSelect.value;
+    }
+
+    function searchNominatim(query) {
+        return fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&addressdetails=1&q=${encodeURIComponent(query)}`)
+            .then(res => res.json());
+    }
+
     function geocodeCurrentAddress() {
-        let addr = addressInput.value.trim();
-        if(addr.length > 5) {
-            let btnOriginalHtml = btnGeocode.innerHTML;
-            btnGeocode.innerHTML = '<i class="fas fa-spinner animate-spin"></i>';
-            
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addr + ', Lhokseumawe')}`)
-                .then(res => res.json())
+        if (!shouldGeocode()) {
+            return;
+        }
+
+        let queries = buildGeocodeQueries();
+        if (queries.length === 0) {
+            return;
+        }
+
+        let attemptIndex = 0;
+
+        function tryNext() {
+            if (attemptIndex >= queries.length) {
+                console.warn('Alamat tidak ditemukan untuk semua query:', queries);
+                return;
+            }
+
+            let query = queries[attemptIndex++];
+            searchNominatim(query)
                 .then(data => {
                     if (data && data.length > 0) {
                         let lat = parseFloat(data[0].lat);
@@ -175,20 +490,54 @@ document.addEventListener('DOMContentLoaded', function() {
                         marker.setLatLng([lat, lng]);
                         latInput.value = lat;
                         lngInput.value = lng;
+                    } else {
+                        tryNext();
                     }
-                    btnGeocode.innerHTML = btnOriginalHtml;
                 })
-                .catch(() => {
-                    btnGeocode.innerHTML = btnOriginalHtml;
+                .catch(err => {
+                    console.error('Geocode error for query', query, err);
+                    tryNext();
                 });
         }
+
+        tryNext();
     }
 
-    // Auto-geocode when leaving the address field
-    addressInput.addEventListener('blur', geocodeCurrentAddress);
-    
-    // Also geocode when clicking the button
-    btnGeocode.addEventListener('click', geocodeCurrentAddress);
+    provinceSelect.addEventListener('change', function() {
+        let provinceId = this.selectedOptions[0]?.dataset.id;
+        if (provinceId) {
+            loadRegencies(provinceId);
+        }
+        updateHiddenAddress();
+        geocodeCurrentAddress();
+    });
+    citySelect.addEventListener('change', function() {
+        let cityId = this.selectedOptions[0]?.dataset.id;
+        if (cityId) {
+            loadDistricts(cityId);
+        }
+        updateHiddenAddress();
+        geocodeCurrentAddress();
+    });
+    subdistrictSelect.addEventListener('change', function() {
+        let districtId = this.selectedOptions[0]?.dataset.id;
+        if (districtId) {
+            loadVillages(districtId);
+        }
+        updateHiddenAddress();
+        geocodeCurrentAddress();
+    });
+    villageSelect.addEventListener('change', function() {
+        updateHiddenAddress();
+        geocodeCurrentAddress();
+    });
+
+    if (patientForm) {
+        patientForm.addEventListener('submit', updateHiddenAddress);
+    }
+
+    // Load initial province list
+    loadProvinces();
 });
 </script>
 @endsection

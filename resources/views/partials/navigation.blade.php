@@ -10,7 +10,7 @@
     @if(auth()->user()->isAdmin())
         <!-- Patients -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('patients.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-users w-5 text-center"></i>
@@ -34,7 +34,7 @@
 
         <!-- Prescriptions -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('prescriptions.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-prescription-bottle-medical w-5 text-center"></i>
@@ -58,7 +58,7 @@
         
         <!-- Deliveries -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('deliveries.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-truck-medical w-5 text-center"></i>
@@ -82,7 +82,7 @@
         
         <!-- Reports -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('reports.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-chart-bar w-5 text-center"></i>
@@ -112,7 +112,7 @@
     @if(auth()->user()->isApoteker())
         <!-- Patients -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('patients.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-users w-5 text-center"></i>
@@ -136,7 +136,7 @@
 
         <!-- Prescriptions -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('prescriptions.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-prescription-bottle-medical w-5 text-center"></i>
@@ -160,7 +160,7 @@
         
         <!-- Deliveries -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('deliveries.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-truck-medical w-5 text-center"></i>
@@ -184,7 +184,7 @@
         
         <!-- Reports -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('reports.*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-chart-bar w-5 text-center"></i>
@@ -207,7 +207,7 @@
     @if(auth()->user()->isKurir())
         <!-- Delivery Process -->
         <div class="space-y-1">
-            <button onclick="toggleSubmenu(this)" 
+            <button type="button" onclick="toggleSubmenu(this)" 
                     class="nav-item flex items-center justify-between w-full space-x-3 px-3 py-3 rounded-lg {{ request()->routeIs('delivery-process.*') || request()->routeIs('my-deliveries*') ? 'bg-tni-900 border-l-4 border-gold-500 text-gold-400 font-medium shadow-md shadow-tni-900/50' : 'text-tni-200 hover:bg-tni-700/50 hover:text-white transition-all duration-200' }}">
                 <div class="flex items-center space-x-3">
                     <i class="fas fa-truck-fast w-5 text-center"></i>
@@ -287,8 +287,8 @@
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
             if (href && currentPath.includes(href.replace(/^.*\/\/[^\/]+/, ''))) {
-                // Open parent submenu if exists
-                const submenu = link.closest('.space-y-1')?.querySelector('.submenu');
+                // Open parent submenu if exists (only within div wrappers, not matching the main nav.space-y-1)
+                const submenu = link.closest('div.space-y-1')?.querySelector('.submenu');
                 if (submenu) {
                     submenu.classList.add('open');
                 }
@@ -296,3 +296,4 @@
         });
     });
 </script>
+

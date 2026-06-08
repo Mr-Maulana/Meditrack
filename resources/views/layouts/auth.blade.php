@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'MediTrack - Login')</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -78,9 +81,9 @@
             
             <!-- Logo/Header -->
             <div class="text-center mb-10 relative z-10">
-                <div class="w-20 h-20 bg-gradient-to-br from-tni-800 to-tni-900 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl border border-tni-700">
-                    <div class="w-16 h-16 bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl flex items-center justify-center border border-gold-300/50 shadow-inner">
-                        <i class="fas fa-hospital-user text-tni-900 text-3xl"></i>
+                <div class="w-20 h-20 bg-gradient-to-br from-gold-300 via-tni-500 to-gold-600 p-[2.5px] rounded-2xl shadow-2xl shadow-gold-500/30 hover:rotate-3 transition-all duration-500 mx-auto mb-6">
+                    <div class="w-full h-full bg-tni-950 rounded-[13px] flex items-center justify-center overflow-hidden">
+                        <img src="{{ asset('images/logo.png') }}" alt="MediTrack Logo" class="w-full h-full object-cover">
                     </div>
                 </div>
                 <h1 class="text-3xl font-black text-gray-900 tracking-tight">MediTrack</h1>

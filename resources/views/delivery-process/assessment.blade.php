@@ -428,6 +428,13 @@ function setupLogic() {
                 btn.innerHTML = '<span>Kirim Laporan Assesmen</span>';
                 btn.disabled = false;
             }
+        })
+        .catch(error => {
+            console.error('Submit error:', error);
+            alert('Terjadi kesalahan jaringan. Periksa koneksi Anda dan coba lagi.');
+            isSubmitting = false;
+            btn.innerHTML = '<span>Kirim Laporan Assesmen</span>';
+            btn.disabled = false;
         });
     };
 }

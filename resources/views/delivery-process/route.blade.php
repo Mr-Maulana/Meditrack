@@ -439,7 +439,7 @@ function startLocationTracking() {
 }
 
 function updateLocationToServer() {
-    fetch(`/delivery-process/{{ $assessment->id }}/update-location`, {
+    fetch(`/delivery-process/{{ $assessment->id }}/location`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -456,6 +456,11 @@ function updateLocationToServer() {
 
 function markArrival() {
     if (confirm('Konfirmasi Kedatangan di Lokasi Pasien?')) {
+        const btn = document.getElementById('arrivalBtn');
+        const originalContent = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i> Memproses...';
+
         fetch(`/delivery-process/{{ $assessment->id }}/arrival`, {
             method: 'POST',
             headers: {
@@ -467,7 +472,17 @@ function markArrival() {
         .then(data => {
             if (data.success) {
                 window.location.href = data.redirect_url;
+            } else {
+                alert(data.error || 'Gagal menandai kedatangan. Silakan coba lagi.');
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan jaringan. Silakan coba lagi.');
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
         });
     }
 }

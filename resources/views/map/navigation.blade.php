@@ -341,7 +341,7 @@
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tanda Tangan Penerima</label>
                         <div class="border border-gray-300 rounded-lg p-4 bg-white">
-                            <div id="signature-pad" class="border border-gray-200 rounded h-40 w-full"></div>
+                            <canvas id="signature-pad" class="border border-gray-200 rounded h-40 w-full"></canvas>
                             <div class="mt-2 flex justify-between">
                                 <button type="button" onclick="clearSignature()" class="text-sm text-red-600 hover:text-red-800">
                                     <i class="fas fa-eraser mr-1"></i> Hapus
@@ -375,10 +375,11 @@
                         <label class="flex items-center">
                             <input type="radio" name="failure_reason" value="lainnya" class="mr-2">
                             <span class="text-sm text-gray-700">Lainnya</span>
-                        </div>
+                        </label>
                         <textarea name="failure_notes" rows="2" 
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mt-2 hidden"
                             placeholder="Jelaskan alasan kegagalan..."></textarea>
+                    </div>
                 </div>
             </div>
             

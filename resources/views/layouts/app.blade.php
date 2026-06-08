@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'MediTrack - Sistem Antar Obat')</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    
     <!-- Vite Assets -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
@@ -200,8 +203,10 @@
             <!-- Logo & Toggle -->
             <div class="p-5 border-b border-tni-700/50 flex items-center justify-between bg-tni-900/30">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/30 border border-gold-300/50">
-                        <i class="fas fa-hospital-user text-tni-900 text-xl"></i>
+                    <div class="w-10 h-10 bg-gradient-to-br from-gold-300 via-tni-500 to-gold-600 p-[1.5px] rounded-xl shadow-lg shadow-gold-500/20 hover:scale-105 hover:shadow-gold-500/40 transition-all duration-300">
+                        <div class="w-full h-full bg-tni-950 rounded-[10px] flex items-center justify-center overflow-hidden">
+                            <img src="{{ asset('images/logo.png') }}" alt="MediTrack Logo" class="w-full h-full object-cover">
+                        </div>
                     </div>
                     <div class="logo-text">
                         <h2 class="text-xl font-bold text-white tracking-tight leading-tight">MediTrack</h2>
@@ -210,7 +215,7 @@
                 </div>
                 
                 <!-- Desktop Toggle Button -->
-                <button onclick="toggleDesktopSidebar()" class="toggle-btn p-2 rounded-lg hover:bg-tni-700 text-tni-200 transition-colors">
+                <button type="button" onclick="toggleDesktopSidebar()" class="toggle-btn p-2 rounded-lg hover:bg-tni-700 text-tni-200 transition-colors">
                     <i class="fas fa-chevron-left expand"></i>
                     <i class="fas fa-chevron-right collapse"></i>
                 </button>
@@ -249,15 +254,17 @@
             <!-- Mobile Header -->
             <div class="p-5 border-b border-tni-700/50 flex items-center justify-between bg-tni-900/50">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-pills text-tni-900 text-lg"></i>
+                    <div class="w-10 h-10 bg-gradient-to-br from-gold-300 via-tni-500 to-gold-600 p-[1.5px] rounded-xl shadow-lg shadow-gold-500/20">
+                        <div class="w-full h-full bg-tni-950 rounded-[10px] flex items-center justify-center overflow-hidden">
+                            <img src="{{ asset('images/logo.png') }}" alt="MediTrack Logo" class="w-full h-full object-cover">
+                        </div>
                     </div>
                     <div>
                         <h2 class="text-lg font-black text-white leading-tight">MediTrack</h2>
                         <p class="text-[9px] text-gold-400 font-bold uppercase tracking-widest">Rumkit TK III IM</p>
                     </div>
                 </div>
-                <button onclick="toggleMobileSidebar()" class="w-8 h-8 flex items-center justify-center text-tni-300 hover:text-white hover:bg-tni-700 rounded-full transition-all">
+                <button type="button" onclick="toggleMobileSidebar()" class="w-8 h-8 flex items-center justify-center text-tni-300 hover:text-white hover:bg-tni-700 rounded-full transition-all">
                     <i class="fas fa-times text-sm"></i>
                 </button>
             </div>
@@ -300,12 +307,12 @@
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
                         <!-- Mobile Hamburger Button -->
-                        <button onclick="toggleMobileSidebar()" class="hamburger-btn text-gray-500 hover:text-gray-700 mr-4">
+                        <button type="button" onclick="toggleMobileSidebar()" class="hamburger-btn text-gray-500 hover:text-gray-700 mr-4">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
                         
                         <!-- Desktop Toggle Button -->
-                        <button onclick="toggleDesktopSidebar()" class="desktop-toggle text-gray-500 hover:text-gray-700 mr-4">
+                        <button type="button" onclick="toggleDesktopSidebar()" class="desktop-toggle text-gray-500 hover:text-gray-700 mr-4">
                             <i class="fas fa-bars text-xl"></i>
                         </button>
                         
@@ -324,7 +331,7 @@
                                 $unreadCount = auth()->user()->unreadNotifications->count();
                                 $notifications = auth()->user()->notifications()->take(5)->get();
                             @endphp
-                            <button onclick="toggleNotifications()" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="toggleNotifications()" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-bell text-xl"></i>
                                 @if($unreadCount > 0)
                                 <span class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
@@ -346,7 +353,7 @@
                                 </div>
                                 <div class="max-h-[400px] overflow-y-auto">
                                     @forelse($notifications as $notification)
-                                    <a href="{{ $notification->data['link'] ?? '#' }}" class="block px-5 py-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notification->unread() ? 'bg-blue-50/30' : '' }}">
+                                    <a href="{{ route('notifications.mark-as-read', $notification->id) }}" class="block px-5 py-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notification->unread() ? 'bg-blue-50/30' : '' }}">
                                         <div class="flex items-start">
                                             <div class="flex-shrink-0">
                                                 <div class="w-10 h-10 bg-{{ $notification->data['color'] ?? 'blue' }}-100 text-{{ $notification->data['color'] ?? 'blue' }}-600 rounded-xl flex items-center justify-center shadow-sm">
@@ -383,7 +390,7 @@
                         
                         <!-- User Menu -->
                         <div class="relative">
-                            <button onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none p-1 rounded-lg hover:bg-gray-100 transition-colors">
                                 <div class="w-9 h-9 bg-tni-700 rounded-full flex items-center justify-center text-gold-400 shadow border border-tni-600 font-bold overflow-hidden">
                                     @if(auth()->user()->profile_photo)
                                         <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
@@ -489,7 +496,22 @@
             
             // Check active menu
             highlightActiveMenu();
+            bindMobileNavLinks();
         });
+        
+        function bindMobileNavLinks() {
+            document.querySelectorAll('#mobileSidebar a.nav-item').forEach(link => {
+                link.addEventListener('click', () => {
+                    const sidebar = document.getElementById('mobileSidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    if (sidebar && overlay && sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+        }
         
         function toggleDesktopSidebar() {
             if (sidebarCollapsed) {

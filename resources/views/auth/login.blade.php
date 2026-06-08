@@ -106,16 +106,6 @@
                 </button>
             </div>
         </form>
-
-        <!-- Demo Credentials -->
-        <div class="mt-6 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-            <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Kredensial Demo:</h4>
-            <div class="text-[10px] text-gray-600 space-y-2 font-bold uppercase tracking-tighter">
-                <p class="flex justify-between border-b border-gray-100 pb-1"><span>Admin:</span> <span class="text-[#1e481e]">admin@meditrack.com / password</span></p>
-                <p class="flex justify-between border-b border-gray-100 pb-1"><span>Apoteker:</span> <span class="text-[#1e481e]">apoteker@meditrack.com / password</span></p>
-                <p class="flex justify-between"><span>Kurir:</span> <span class="text-[#1e481e]">kurir@meditrack.com / password</span></p>
-            </div>
-        </div>
     </div>
 
     <style>

@@ -157,7 +157,7 @@
                         <div class="bg-white rounded-2xl p-6 border border-gray-100 space-y-4">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 font-medium">Tanggal Tugas:</span>
-                                <span class="text-gray-800 font-bold">{{ $delivery->delivery_date->format('d/m/Y') }}</span>
+                                <span class="text-gray-800 font-bold">{{ $delivery->delivery_date ? $delivery->delivery_date->format('d/m/Y') : '-' }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 font-medium">Waktu Selesai:</span>

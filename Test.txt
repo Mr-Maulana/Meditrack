@@ -1,0 +1,9 @@
+Kredensial Demo:
+Admin:
+admin@meditrack.com / password
+
+Apoteker:
+apoteker@meditrack.com / password
+
+Kurir:
+kurir@meditrack.com / password

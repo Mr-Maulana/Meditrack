@@ -95,6 +95,8 @@ class MapController extends Controller
             'recipient_phone' => 'nullable|string|max:20',
             'delivery_notes' => 'nullable|string',
             'signature' => 'nullable|string',
+            'failure_reason' => 'required_if:status,failed|nullable|string',
+            'failure_notes' => 'nullable|string',
         ]);
 
         // Authorization check
@@ -102,10 +104,29 @@ class MapController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
+        $notes = $request->delivery_notes;
+        if ($request->status == 'failed') {
+            $reasonLabels = [
+                'pasien_tidak_ada' => 'Pasien tidak ada di lokasi',
+                'alamat_salah' => 'Alamat tidak ditemukan',
+                'lainnya' => 'Lainnya',
+            ];
+            $reason = $reasonLabels[$request->failure_reason] ?? $request->failure_reason;
+            $failureNotes = $request->failure_notes;
+            
+            $notes = "Gagal Kirim: " . $reason;
+            if ($failureNotes) {
+                $notes .= " (" . $failureNotes . ")";
+            }
+            if ($request->delivery_notes) {
+                $notes .= ". Catatan: " . $request->delivery_notes;
+            }
+        }
+
         $data = [
             'status' => $request->status == 'arrived' ? 'on_delivery' : 
                        ($request->status == 'delivered' ? 'delivered' : 'failed'),
-            'notes' => $request->delivery_notes,
+            'notes' => $notes,
         ];
 
         if ($request->status == 'delivered') {
