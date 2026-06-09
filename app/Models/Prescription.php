@@ -76,4 +76,31 @@ class Prescription extends Model
             });
         });
     }
+
+    public function getMedicationList(): array
+    {
+        if (!empty($this->medications)) {
+            return $this->medications;
+        }
+
+        if ($this->medication_name) {
+            return [[
+                'name' => $this->medication_name,
+                'dosage' => $this->dosage,
+                'frequency' => $this->frequency,
+                'duration' => $this->duration,
+                'instructions' => $this->instructions,
+            ]];
+        }
+
+        return [];
+    }
+
+    public function getMedicationSummaryAttribute(): string
+    {
+        return collect($this->getMedicationList())
+            ->pluck('name')
+            ->filter()
+            ->implode(', ') ?: '-';
+    }
 }

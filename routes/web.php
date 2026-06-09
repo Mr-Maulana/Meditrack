@@ -10,8 +10,12 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\MapController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\PrescriptionController; // TAMBAH INI
-use App\Http\Controllers\CourierController; // TAMBAH INI
+use App\Http\Controllers\PrescriptionController;
+use App\Http\Controllers\CourierController;
+use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\IsAdminOrApoteker;
+use App\Http\Middleware\IsApoteker;
+use App\Http\Middleware\IsKurir;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,7 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // ============ ADMIN-ONLY ROUTES (Users, Couriers, etc.) ============
-    Route::middleware(['admin'])->group(function () {
+    Route::middleware([IsAdmin::class])->group(function () {
         // User Management
         Route::resource('users', UserController::class);
         Route::post('/users/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('users.toggle-status');
@@ -55,17 +59,21 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // ============ APOTEKER ROUTES ============
-    Route::middleware(['apoteker'])->group(function () {
+    Route::middleware([IsApoteker::class])->group(function () {
         // Hanya route spesifik apoteker yang tersisa (jika ada)
     });
     
     // ============ KURIR ROUTES ============
-    Route::middleware(['kurir'])->group(function () {
+    Route::middleware([IsKurir::class])->group(function () {
         // Delivery Process
         Route::prefix('delivery-process')->name('delivery-process.')->group(function () {
             Route::get('/', [DeliveryProcessController::class, 'index'])->name('index');
             Route::post('/select', [DeliveryProcessController::class, 'selectDelivery'])->name('select');
             Route::get('/{assessmentId}/route', [DeliveryProcessController::class, 'showRoute'])->name('route');
+            // Legacy route for backward compatibility
+            Route::get('/route/{assessmentId}', function($assessmentId){
+                return redirect()->route('delivery-process.route', $assessmentId);
+            })->name('legacy.route');
             Route::post('/{assessmentId}/start', [DeliveryProcessController::class, 'startDelivery'])->name('start');
             Route::post('/{assessmentId}/location', [DeliveryProcessController::class, 'updateLocation'])->name('location');
             Route::post('/{assessmentId}/arrival', [DeliveryProcessController::class, 'markArrival'])->name('arrival');
@@ -79,11 +87,12 @@ Route::middleware(['auth'])->group(function () {
         
         // My Deliveries
         Route::get('/my-deliveries', [DeliveryProcessController::class, 'myDeliveries'])->name('my-deliveries');
+        Route::get('/my-deliveries/{delivery}/print', [DeliveryProcessController::class, 'printDeliveryProof'])->name('my-deliveries.print');
         Route::get('/my-deliveries/{delivery}', [DeliveryProcessController::class, 'myDeliveryDetail'])->name('my-deliveries.detail');
     });
     
     // ============ SHARED ROUTES (Admin + Apoteker) ============
-    Route::middleware(['admin_apoteker'])->group(function () {
+    Route::middleware([IsAdminOrApoteker::class])->group(function () {
         // Patient Management
         Route::resource('patients', PatientController::class);
         Route::get('/patients/{patient}/history', [PatientController::class, 'history'])->name('patients.history');
@@ -104,6 +113,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/deliveries/{delivery}/track', [DeliveryController::class, 'track'])->name('deliveries.track');
         Route::post('/deliveries/{delivery}/status', [DeliveryController::class, 'updateStatus'])->name('deliveries.update-status');
         Route::get('/deliveries/{delivery}/print', [DeliveryController::class, 'printLabel'])->name('deliveries.print');
+        Route::get('/deliveries/{delivery}/print-report', [DeliveryController::class, 'printReport'])->name('deliveries.print-report');
         
         // Reports Management (Unified)
         Route::prefix('reports')->name('reports.')->group(function () {

@@ -92,9 +92,16 @@
                             @endif
                         </td>
                         <td class="px-8 py-6 whitespace-nowrap text-center">
-                            <a href="{{ route('my-deliveries.detail', $delivery->id) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-tni-50 text-tni-600 hover:bg-tni-600 hover:text-white transition shadow-sm">
-                                <i class="fas fa-eye"></i>
-                            </a>
+                            <div class="inline-flex items-center gap-2">
+                                <a href="{{ route('my-deliveries.detail', $delivery->id) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-tni-50 text-tni-600 hover:bg-tni-600 hover:text-white transition shadow-sm" title="Lihat Detail">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                @if($delivery->status === 'delivered')
+                                <a href="{{ route('my-deliveries.print', $delivery->id) }}" target="_blank" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-green-50 text-green-600 hover:bg-green-600 hover:text-white transition shadow-sm" title="Cetak Bukti Pengantaran">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty

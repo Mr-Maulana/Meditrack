@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +52,21 @@ class Delivery extends Model
         'current_latitude' => 'decimal:8',
         'current_longitude' => 'decimal:8',
     ];
+
+    public function scopeInReportPeriod($query, string $startDate, string $endDate)
+    {
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
+
+        return $query->where(function ($q) use ($startDate, $endDate, $start, $end) {
+            $q->whereBetween('delivery_date', [$startDate, $endDate])
+                ->orWhere(function ($sub) use ($start, $end) {
+                    $sub->where('status', 'delivered')
+                        ->whereNotNull('delivered_at')
+                        ->whereBetween('delivered_at', [$start, $end]);
+                });
+        });
+    }
 
     public function patient()
     {

@@ -29,7 +29,12 @@
             </ol>
         </nav>
         
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2">
+            @if($delivery->status === 'delivered')
+            <a href="{{ route('my-deliveries.print', $delivery->id) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition shadow-md font-medium">
+                <i class="fas fa-print mr-2"></i> Cetak Bukti Pengantaran
+            </a>
+            @endif
             <a href="{{ route('my-deliveries') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition shadow-md font-medium">
                 <i class="fas fa-arrow-left mr-2"></i> Kembali
             </a>

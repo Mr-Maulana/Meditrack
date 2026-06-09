@@ -282,6 +282,12 @@ class DeliveryController extends Controller
     public function printLabel(Delivery $delivery)
     {
         $delivery->load(['patient', 'prescription', 'courier']);
+        return view('deliveries.receipt', compact('delivery'));
+    }
+
+    public function printReport(Delivery $delivery)
+    {
+        $delivery->load(['patient', 'prescription', 'courier', 'assessment']);
         return view('deliveries.print', compact('delivery'));
     }
 }

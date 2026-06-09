@@ -257,7 +257,7 @@
     }
 
     .submenu.open {
-        max-height: 500px;
+        max-height: 999px;
         transition: max-height 0.3s ease-in;
     }
 
@@ -265,7 +265,7 @@
         transition: transform 0.3s ease;
     }
 
-    .submenu.open .submenu-icon {
+    .submenu-icon.rotated {
         transform: rotate(180deg);
     }
 </style>
@@ -275,7 +275,13 @@
     function toggleSubmenu(element) {
         const submenu = element.nextElementSibling;
         if (submenu && submenu.classList.contains('submenu')) {
-            submenu.classList.toggle('open');
+            const isOpen = submenu.classList.toggle('open');
+            submenu.style.maxHeight = isOpen ? `${submenu.scrollHeight}px` : '0';
+
+            const icon = element.querySelector('.submenu-icon');
+            if (icon) {
+                icon.classList.toggle('rotated', isOpen);
+            }
         }
     }
     
@@ -291,6 +297,13 @@
                 const submenu = link.closest('div.space-y-1')?.querySelector('.submenu');
                 if (submenu) {
                     submenu.classList.add('open');
+                    submenu.style.maxHeight = `${submenu.scrollHeight}px`;
+
+                    const button = submenu.previousElementSibling;
+                    const icon = button?.querySelector('.submenu-icon');
+                    if (icon) {
+                        icon.classList.add('rotated');
+                    }
                 }
             }
         });

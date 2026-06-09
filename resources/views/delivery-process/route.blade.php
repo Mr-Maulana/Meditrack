@@ -92,6 +92,96 @@
         border-radius: 12px !important;
         margin-bottom: 5px !important;
     }
+
+    /* ─── Mobile Info FAB ─── */
+    .info-fab {
+        position: fixed;
+        bottom: 6rem;
+        left: 1.25rem;
+        z-index: 2000;
+        display: none;
+    }
+    @media (max-width: 767px) {
+        .info-fab { display: flex; align-items: center; justify-content: center; }
+    }
+    .info-fab-btn {
+        width: 3.25rem;
+        height: 3.25rem;
+        border-radius: 9999px;
+        background: linear-gradient(135deg, #254328 0%, #3d6b42 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        box-shadow: 0 8px 24px rgba(37,67,40,0.45);
+        position: relative;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .info-fab-btn:active { transform: scale(0.93); }
+    .info-fab-btn .fab-icon {
+        transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .info-fab-btn.open .fab-icon { transform: rotate(45deg); }
+    .info-fab-btn::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 9999px;
+        background: rgba(37,67,40,0.25);
+        animation: fabPulse 2.5s ease-out infinite;
+    }
+    @keyframes fabPulse {
+        0%   { transform: scale(1); opacity: 0.7; }
+        70%  { transform: scale(1.5); opacity: 0; }
+        100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    /* ─── Slide-up panel (mobile) ─── */
+    .mobile-info-panel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1900;
+        background: rgba(255,255,255,0.97);
+        backdrop-filter: blur(20px);
+        border-radius: 1.75rem 1.75rem 0 0;
+        padding: 1.5rem 1.5rem 2.5rem;
+        box-shadow: 0 -12px 40px rgba(0,0,0,0.18);
+        transform: translateY(100%);
+        transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+        display: none;
+    }
+    @media (max-width: 767px) {
+        .mobile-info-panel { display: block; }
+    }
+    .mobile-info-panel.visible {
+        transform: translateY(0);
+    }
+    .panel-drag-handle {
+        width: 2.5rem;
+        height: 4px;
+        background: #d1d5db;
+        border-radius: 9999px;
+        margin: 0 auto 1.25rem;
+    }
+
+    /* ─── Panel backdrop overlay ─── */
+    .panel-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1800;
+        background: rgba(0,0,0,0);
+        pointer-events: none;
+        transition: background 0.38s ease;
+    }
+    .panel-backdrop.visible {
+        background: rgba(0,0,0,0.35);
+        pointer-events: auto;
+    }
 </style>
 @endsection
 
@@ -133,20 +223,26 @@
         </div>
     </div>
 
-    <!-- Bottom Controls -->
-    <div class="bottom-controls flex-col md:flex-row gap-4">
-        <!-- Floating Info Card (Bottom Left) -->
-        <div class="pointer-events-auto bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl border border-white/20 w-full md:w-80">
-            <h4 class="text-xs font-black text-gold-600 uppercase tracking-widest mb-4">Target Pengantaran</h4>
-            <div class="space-y-4">
-                <div class="flex gap-3">
-                    <i class="fas fa-map-marker-alt text-red-500 mt-1"></i>
-                    <p class="text-[11px] font-bold text-gray-700 leading-relaxed">{{ $assessment->delivery->delivery_address }}</p>
-                </div>
-                <div class="flex gap-3">
-                    <i class="fas fa-phone text-tni-500 mt-0.5"></i>
-                    <p class="text-[11px] font-bold text-gray-700">{{ $assessment->delivery->patient->phone }}</p>
-                </div>
+        <!-- Bottom Controls -->
+        <div class="bottom-controls flex-col md:flex-row gap-4">
+            <!-- Desktop Floating Info Card -->
+            <div class="pointer-events-auto bg-white/90 backdrop-blur-xl p-6 rounded-[2rem] shadow-2xl border border-white/20 w-full md:w-80 hidden md:block" id="targetInfoCard">
+                <h4 class="text-xs font-black text-gold-600 uppercase tracking-widest mb-4">Target Pengantaran</h4>
+                <div class="space-y-4">
+                    <div class="flex gap-3">
+                        <i class="fas fa-map-marker-alt text-red-500 mt-1"></i>
+                        <p class="text-[11px] font-bold text-gray-700 leading-relaxed">{{ $assessment->delivery->delivery_address }}</p>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex gap-3 items-center">
+                            <i class="fas fa-phone text-tni-500 mt-0.5"></i>
+                            <p class="text-[11px] font-bold text-gray-700">{{ $assessment->delivery->patient->phone }}</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="tel:{{ $assessment->delivery->patient->phone }}" class="flex items-center px-4 py-2 bg-tni-500 text-white rounded-xl hover:bg-tni-600 transition-colors text-[10px] font-bold"><i class="fas fa-phone mr-2"></i> Telepon</a>
+                            <a href="https://wa.me/{{ $assessment->delivery->patient->phone }}" target="_blank" class="flex items-center px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors text-[10px] font-bold"><i class="fab fa-whatsapp mr-2"></i> WhatsApp</a>
+                        </div>
+                    </div>
                 
                 <div class="pt-4 border-t border-gray-100">
                     <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($assessment->delivery->delivery_address) }}" 
@@ -164,7 +260,7 @@
                         @php $meds = $assessment->delivery->prescription->medications ?? [['name' => $assessment->delivery->prescription->medication_name]]; @endphp
                         @foreach(array_slice($meds, 0, 2) as $med)
                         <span class="text-[9px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg font-black border border-blue-100">
-                            {{ $med['name'] }}
+                            {{ $med['name'] ?? '-' }}
                         </span>
                         @endforeach
                         @if(count($meds) > 2)
@@ -189,6 +285,69 @@
             </button>
         </div>
     </div>
+</div>
+
+<!-- Panel Backdrop (mobile) -->
+<div id="panelBackdrop" class="panel-backdrop" onclick="closeTargetPanel()"></div>
+
+<!-- Mobile Slide-up Info Panel -->
+<div id="mobileInfoPanel" class="mobile-info-panel">
+    <div class="panel-drag-handle"></div>
+    <div class="flex items-center justify-between mb-4">
+        <h4 class="text-sm font-black text-gray-800 uppercase tracking-widest flex items-center gap-2">
+            <i class="fas fa-map-pin text-gold-500"></i> Target Pengantaran
+        </h4>
+        <button onclick="closeTargetPanel()" class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full text-gray-400 hover:bg-gray-200 transition-colors">
+            <i class="fas fa-times text-xs"></i>
+        </button>
+    </div>
+    <div class="space-y-3">
+        <!-- Alamat -->
+        <div class="flex gap-3 bg-red-50 p-3 rounded-2xl">
+            <i class="fas fa-map-marker-alt text-red-500 mt-0.5"></i>
+            <p class="text-xs font-bold text-gray-700 leading-relaxed">{{ $assessment->delivery->delivery_address }}</p>
+        </div>
+        <!-- Telepon -->
+        <div class="bg-gray-50 p-3 rounded-2xl">
+            <div class="flex items-center gap-2 mb-2">
+                <i class="fas fa-phone text-tni-600 text-xs"></i>
+                <p class="text-xs font-black text-gray-800">{{ $assessment->delivery->patient->phone }}</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="tel:{{ $assessment->delivery->patient->phone }}" class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-tni-600 text-white rounded-xl text-xs font-black hover:bg-tni-700 active:scale-95 transition-all">
+                    <i class="fas fa-phone"></i> Telepon
+                </a>
+                <a href="https://wa.me/{{ $assessment->delivery->patient->phone }}" target="_blank" class="flex-1 flex items-center justify-center gap-2 py-2.5 bg-green-500 text-white rounded-xl text-xs font-black hover:bg-green-600 active:scale-95 transition-all">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+            </div>
+        </div>
+        <!-- Google Maps -->
+        <a href="https://www.google.com/maps/dir/?api=1&destination={{ urlencode($assessment->delivery->delivery_address) }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 border-2 border-gold-500 text-gold-600 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-gold-50 active:scale-95 transition-all">
+            <i class="fas fa-location-arrow"></i> Buka di Google Maps
+        </a>
+        @if($assessment->delivery->prescription)
+        <div class="pt-2 border-t border-gray-100">
+            <p class="text-[9px] font-black text-gray-400 uppercase tracking-wider mb-2">Obat Dibawa:</p>
+            <div class="flex flex-wrap gap-1.5">
+                @php $medsMobile = $assessment->delivery->prescription->medications ?? [['name' => $assessment->delivery->prescription->medication_name]]; @endphp
+                @foreach(array_slice($medsMobile, 0, 3) as $med)
+                <span class="text-[9px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg font-black border border-blue-100">{{ $med['name'] ?? '-' }}</span>
+                @endforeach
+                @if(count($medsMobile) > 3)
+                <span class="text-[9px] text-gray-400 font-bold">+{{ count($medsMobile)-3 }} lainnya</span>
+                @endif
+            </div>
+        </div>
+        @endif
+    </div>
+</div>
+
+<!-- Mobile FAB button -->
+<div class="info-fab">
+    <button type="button" id="infoFabBtn" class="info-fab-btn" onclick="toggleTargetPanel()" title="Info Pengantaran">
+        <i class="fas fa-info fab-icon"></i>
+    </button>
 </div>
 
 <!-- Modal Panduan (Hidden by default) -->
@@ -520,6 +679,29 @@ function confirmCancellation() {
         btn.innerHTML = 'Ya, Batalkan Pengantaran';
         alert('Gagal membatalkan pengantaran. Silakan coba lagi.');
     });
+}
+
+function toggleTargetPanel() {
+    var panel    = document.getElementById('mobileInfoPanel');
+    var backdrop = document.getElementById('panelBackdrop');
+    var fabBtn   = document.getElementById('infoFabBtn');
+    var isOpen   = panel.classList.contains('visible');
+    if (isOpen) {
+        closeTargetPanel();
+    } else {
+        panel.classList.add('visible');
+        backdrop.classList.add('visible');
+        fabBtn.classList.add('open');
+    }
+}
+
+function closeTargetPanel() {
+    var panel    = document.getElementById('mobileInfoPanel');
+    var backdrop = document.getElementById('panelBackdrop');
+    var fabBtn   = document.getElementById('infoFabBtn');
+    panel.classList.remove('visible');
+    backdrop.classList.remove('visible');
+    if (fabBtn) fabBtn.classList.remove('open');
 }
 </script>
 

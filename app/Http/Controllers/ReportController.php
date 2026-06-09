@@ -163,8 +163,15 @@ class ReportController extends Controller
                     return $query->where('courier_id', $user->id);
                 }
             })
-            ->whereBetween('delivery_date', [$startDate, $endDate])
+            ->inReportPeriod($startDate, $endDate)
+            ->orderByDesc('delivered_at')
+            ->orderByDesc('delivery_date')
             ->get();
+
+        $deliveredDeliveries = $deliveries
+            ->where('status', 'delivered')
+            ->sortByDesc(fn ($delivery) => $delivery->delivered_at ?? $delivery->delivery_date)
+            ->values();
 
         $deliveryStats = [
             'total' => $deliveries->count(),
@@ -212,6 +219,7 @@ class ReportController extends Controller
 
         return [
             'deliveries' => $deliveries,
+            'deliveredDeliveries' => $deliveredDeliveries,
             'deliveryStats' => $deliveryStats,
             'successRate' => $successRate,
             'dailyTrend' => $dailyTrend,
@@ -231,7 +239,7 @@ class ReportController extends Controller
                     return $query->where('courier_id', $user->id);
                 }
             })
-            ->whereBetween('delivery_date', [$startDate, $endDate])
+            ->inReportPeriod($startDate, $endDate)
             ->where('status', 'delivered')
             ->get();
 
@@ -239,7 +247,7 @@ class ReportController extends Controller
         $estimatedRevenue = $deliveries->count() * $revenuePerDelivery;
 
         // Monthly revenue trend
-        $monthlyRevenue = Delivery::whereBetween('delivery_date', [$startDate, $endDate])
+        $monthlyRevenue = Delivery::inReportPeriod($startDate, $endDate)
             ->where('status', 'delivered')
             ->select(
                 DB::raw('DATE_FORMAT(delivery_date, "%Y-%m") as month'),

@@ -73,12 +73,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
                             <div class="md:col-span-2 lg:col-span-2">
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nama Obat</label>
-                                <input type="text" name="medications[{{ $index }}][name]" value="{{ $med['name'] }}" required 
+                                <input type="text" name="medications[{{ $index }}][name]" value="{{ $med['name'] ?? '' }}" required 
                                     class="w-full px-5 py-3.5 bg-gray-50 border border-transparent rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all">
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Dosis</label>
-                                <input type="text" name="medications[{{ $index }}][dosage]" value="{{ $med['dosage'] }}" required 
+                                <input type="text" name="medications[{{ $index }}][dosage]" value="{{ $med['dosage'] ?? '' }}" required 
                                     class="w-full px-5 py-3.5 bg-gray-50 border border-transparent rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all">
                             </div>
                             <div>
@@ -92,7 +92,7 @@
                             </div>
                             <div>
                                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Durasi</label>
-                                <input type="text" name="medications[{{ $index }}][duration]" value="{{ $med['duration'] }}" required 
+                                <input type="text" name="medications[{{ $index }}][duration]" value="{{ $med['duration'] ?? '' }}" required 
                                     class="w-full px-5 py-3.5 bg-gray-50 border border-transparent rounded-xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all">
                             </div>
                             <div class="flex items-end">
@@ -108,6 +108,7 @@
                         </div>
                     </div>
                     @endforeach
+
                 </div>
             </div>
 

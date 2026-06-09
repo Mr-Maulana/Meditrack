@@ -47,7 +47,7 @@
                     @foreach($meds as $med)
                     <div class="flex items-center p-3 bg-green-50 rounded-lg border border-green-100">
                         <i class="fas fa-pills text-green-600 mr-3"></i>
-                        <span class="text-sm font-bold text-green-800">{{ $med['name'] }}</span>
+                        <span class="text-sm font-bold text-green-800">{{ $med['name'] ?? '-' }}</span>
                     </div>
                     @endforeach
                 </div>

@@ -666,16 +666,29 @@ class DeliveryProcessController extends Controller
 
     public function myDeliveryDetail($deliveryId)
     {
+        $delivery = $this->findCourierDelivery($deliveryId);
+
+        return view('delivery-process.my-delivery-detail', compact('delivery'));
+    }
+
+    public function printDeliveryProof($deliveryId)
+    {
+        $delivery = $this->findCourierDelivery($deliveryId);
+        $delivery->load(['patient', 'prescription', 'courier', 'assessment']);
+
+        return view('delivery-process.print-proof', compact('delivery'));
+    }
+
+    private function findCourierDelivery($deliveryId): Delivery
+    {
         $user = Auth::user();
         if (!$user->isKurir() && !$user->isAdmin()) {
             abort(403, 'Hanya kurir yang dapat mengakses halaman ini.');
         }
 
-        $delivery = Delivery::with(['patient', 'prescription', 'assessment'])
+        return Delivery::with(['patient', 'prescription', 'assessment'])
             ->where('id', $deliveryId)
             ->where('courier_id', $user->id)
             ->firstOrFail();
-
-        return view('delivery-process.my-delivery-detail', compact('delivery'));
     }
 }

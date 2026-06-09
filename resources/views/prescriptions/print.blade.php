@@ -106,8 +106,8 @@
         </div>
 
         <div class="med-box">
-            <span class="med-name">{{ strtoupper($med['name']) }}</span>
-            <span class="usage">{{ $med['frequency'] }}</span>
+            <span class="med-name">{{ strtoupper($med['name'] ?? '-') }}</span>
+            <span class="usage">{{ $med['frequency'] ?? '-' }}</span>
             <span class="instruction">{{ strtoupper($med['instructions'] ?? 'SESUAI PETUNJUK') }}</span>
         </div>
 

@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
 @section('title', 'Ringkasan Eksekutif')
-@section('page-title', 'Laporan Ringkasan')
+@section('page-title', 'Ringkasan Eksekutif')
 @section('content')
-<div class="max-w-6xl mx-auto space-y-8 animate-fade-in pb-12">
+<div class="max-w-6xl mx-auto space-y-8 animate-fade-in pb-12 report-document">
     <!-- Header with Actions (Visible on Screen) -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
         <div>
@@ -20,36 +20,14 @@
         </div>
     </div>
 
-    <!-- Formal Letterhead (Visible ONLY on print) -->
-    <div class="hidden print:block mb-12 border-b-4 border-double border-black pb-8">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-8">
-                <div class="w-24 h-24 bg-tni-800 rounded-2xl flex items-center justify-center text-gold-400 text-5xl shadow-lg">
-                    <i class="fas fa-shield-halved"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black uppercase tracking-tight leading-none mb-1">Tentara Nasional Indonesia Angkatan Darat</h1>
-                    <h2 class="text-xl font-bold uppercase tracking-tight text-gray-800 leading-none mb-1">Kesehatan Daerah Militer Iskandar Muda</h2>
-                    <h3 class="text-lg font-bold uppercase text-tni-900 leading-none">Rumkit TK III IM 07.01 Lhokseumawe</h3>
-                    <p class="text-sm text-gray-500 mt-3 font-medium">Jl. Sultan Iskandar Muda No. 1, Kec. Banda Sakti, Kota Lhokseumawe, Aceh 24311</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <div class="px-5 py-3 bg-gray-100 rounded-xl mb-3 border border-gray-200">
-                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Dokumen Resmi</p>
-                    <p class="text-base font-black text-tni-900">MT/REP/{{ date('Ymd') }}</p>
-                </div>
-                <p class="text-xs font-bold text-gray-400">Dicetak: {{ now()->format('d/m/Y H:i') }} WIB</p>
-            </div>
-        </div>
-        <div class="text-center mt-12">
-            <h2 class="text-2xl font-black uppercase border-b-2 border-black inline-block pb-1 mb-2">Laporan Ringkasan Eksekutif</h2>
-            <p class="text-sm font-bold text-gray-600">Periode Data: {{ \Carbon\Carbon::parse($startDate)->format('d F Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d F Y') }}</p>
-        </div>
-    </div>
+    @include('reports.partials.letterhead', [
+        'documentLabel' => 'Dokumen Resmi',
+        'documentCode' => 'MT/REP/' . date('Ymd'),
+        'reportTitle' => 'Laporan Ringkasan Eksekutif',
+    ])
 
     <!-- Stats Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
+    <div class="report-stats grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
         <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-tni-800 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
             <div class="w-12 h-12 bg-tni-50 text-tni-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
                 <i class="fas fa-users text-xl"></i>
@@ -89,7 +67,7 @@
             <h3 class="font-black text-tni-900 uppercase tracking-widest text-xs">Rincian Performa Laporan</h3>
         </div>
         <div class="p-0 overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="report-table w-full text-left">
                 <thead>
                     <tr class="bg-gray-50 print:bg-gray-200">
                         <th class="px-8 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Kategori Data</th>
@@ -127,13 +105,18 @@
         <div class="text-center">
             <p class="text-sm font-bold mb-20 text-gray-800">Mengetahui,<br>Kepala Instalasi Farmasi</p>
             <div class="border-b border-black w-48 mx-auto mb-1"></div>
-            <p class="text-xs font-black uppercase">Pangkat / NRP</p>
+            <p class="text-xs font-black uppercase">      /    </p>
         </div>
         <div class="text-center">
             <p class="text-sm font-bold mb-20 text-gray-800">Lhokseumawe, {{ now()->format('d F Y') }}<br>Petugas Administrasi</p>
             <div class="border-b border-black w-48 mx-auto mb-1"></div>
             <p class="text-xs font-black uppercase">{{ auth()->user()->name }}</p>
         </div>
+    </div>
+    <div class="text-center">
+        <p class="text-sm font-bold mb-20 text-gray-800">Mengetahui,<br>Kepala Rumah Sakit TK III IM 07.01 Lhokseumawe</p>
+        <div class="border-b border-black w-48 mx-auto mb-1"></div>
+        <p class="text-xs font-black uppercase">dr. sudirman suti, S.P, FISR., M.H.<br>Letnan Kolonel Ckm NRP 11050020241075</p>
     </div>
 </div>
 

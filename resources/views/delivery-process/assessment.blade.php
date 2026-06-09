@@ -245,7 +245,7 @@
                 @foreach($meds as $med)
                 <div class="p-5 bg-blue-50/50 rounded-3xl border border-blue-100 flex justify-between items-center">
                     <div>
-                        <h4 class="text-sm font-black text-blue-900">{{ $med['name'] }}</h4>
+                        <h4 class="text-sm font-black text-blue-900">{{ $med['name'] ?? '-' }}</h4>
                         <p class="text-[10px] text-blue-600 font-bold uppercase">{{ $med['dosage'] ?? '-' }} | {{ $med['frequency'] ?? '-' }}</p>
                     </div>
                     <div class="w-8 h-8 bg-white rounded-xl flex items-center justify-center text-blue-500 shadow-sm border border-blue-100">

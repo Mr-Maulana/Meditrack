@@ -17,13 +17,109 @@
     <!-- Custom CSS -->
     <style>
         @media print {
-            .no-print {
+            .no-print,
+            .sidebar,
+            #mobileSidebar,
+            #sidebarOverlay,
+            .overlay {
                 display: none !important;
             }
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+            .main-content > nav,
+            .main-content > footer {
+                display: none !important;
+            }
+            .main-content > main {
+                padding: 0 !important;
+                background: #fff !important;
+            }
             body {
-                font-family: 'Courier New', monospace !important;
+                font-family: Arial, Helvetica, sans-serif !important;
+                font-size: 10pt !important;
+                color: #111 !important;
+                background: #fff !important;
+            }
+            .report-document {
+                width: 100% !important;
+                margin: 0 auto !important;
+                padding: 0 !important;
+            }
+            .report-letterhead {
+                page-break-after: avoid;
+            }
+            .overflow-x-auto {
+                overflow-x: visible !important;
+            }
+            .report-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 0 !important;
+                table-layout: fixed !important;
+                page-break-inside: auto !important;
+            }
+            .report-table thead {
+                display: table-header-group !important;
+            }
+            .report-table tr {
+                page-break-inside: avoid !important;
+            }
+            .report-table th,
+            .report-table td {
+                border: 1px solid #999 !important;
+                padding: 6px !important;
+                word-wrap: break-word !important;
+                hyphens: auto !important;
+                vertical-align: top !important;
+            }
+            .report-table th {
+                background: #f4f4f4 !important;
+                color: #111 !important;
                 font-size: 9pt !important;
             }
+            .report-table td {
+                background: #fff !important;
+                color: #111 !important;
+                font-size: 9pt !important;
+            }
+            .print\:bg-gray-100 { background: #f4f4f4 !important; }
+            .print\:bg-gray-200 { background: #e5e7eb !important; }
+            .print\:shadow-none { box-shadow: none !important; }
+            .bg-white { background: #fff !important; }
+            .shadow-xl, .shadow-2xl, .shadow-sm { box-shadow: none !important; }
+            .rounded-3xl,
+            .rounded-[2.5rem],
+            .rounded-2xl {
+                border-radius: 6px !important;
+            }
+            .report-stats {
+                display: none !important;
+            }
+            .report-letterhead {
+                position: relative;
+                padding-top: 1rem;
+            }
+            .report-letterhead .report-meta {
+                position: absolute;
+                top: 0;
+                right: 0;
+                text-align: right;
+                font-size: 8pt;
+                line-height: 1.2;
+            }
+            .report-letterhead .report-meta .px-3 {
+                padding: 6px 8px !important;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 15mm;
         }
         
         .sidebar {
@@ -198,7 +294,7 @@
 
     @if(Auth::check())
     <!-- Desktop Sidebar -->
-    <div class="sidebar fixed left-0 top-0 h-screen bg-tni-800 shadow-2xl z-30 hidden lg:block border-r border-tni-700" id="desktopSidebar">
+    <div class="sidebar no-print fixed left-0 top-0 h-screen bg-tni-800 shadow-2xl z-30 hidden lg:block border-r border-tni-700" id="desktopSidebar">
         <div class="h-full flex flex-col">
             <!-- Logo & Toggle -->
             <div class="p-5 border-b border-tni-700/50 flex items-center justify-between bg-tni-900/30">
@@ -249,7 +345,7 @@
     </div>
 
     <!-- Mobile Sidebar -->
-    <div class="mobile-sidebar fixed left-0 top-0 h-screen w-64 bg-tni-800 shadow-2xl z-50 lg:hidden transform -translate-x-full transition-transform duration-300" id="mobileSidebar">
+    <div class="mobile-sidebar no-print fixed left-0 top-0 h-screen w-64 bg-tni-800 shadow-2xl z-50 lg:hidden transform -translate-x-full transition-transform duration-300" id="mobileSidebar">
         <div class="h-full flex flex-col">
             <!-- Mobile Header -->
             <div class="p-5 border-b border-tni-700/50 flex items-center justify-between bg-tni-900/50">
@@ -297,12 +393,12 @@
     </div>
 
     <!-- Mobile Overlay -->
-    <div class="overlay fixed inset-0 bg-tni-900/60 backdrop-blur-sm z-40 hidden" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+    <div class="overlay no-print fixed inset-0 bg-tni-900/60 backdrop-blur-sm z-40 hidden" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- Main Content -->
     <div class="main-content min-h-screen flex flex-col" id="mainContent">
         <!-- Top Navigation -->
-        <nav class="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20 transition-all duration-300">
+        <nav class="no-print bg-white shadow-sm border-b border-gray-100 sticky top-0 z-20 transition-all duration-300">
             <div class="px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <div class="flex items-center">
@@ -327,15 +423,11 @@
                     <div class="flex items-center space-x-4">
                         <!-- Notifications -->
                         <div class="relative">
-                            @php
-                                $unreadCount = auth()->user()->unreadNotifications->count();
-                                $notifications = auth()->user()->notifications()->take(5)->get();
-                            @endphp
                             <button type="button" onclick="toggleNotifications()" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-bell text-xl"></i>
-                                @if($unreadCount > 0)
+                                @if(($unreadCount ?? 0) > 0)
                                 <span class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
-                                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                    {{ ($unreadCount ?? 0) > 9 ? '9+' : $unreadCount }}
                                 </span>
                                 @endif
                             </button>
@@ -344,7 +436,7 @@
                             <div id="notificationsMenu" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-0 z-50 overflow-hidden transform transition-all">
                                 <div class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
                                     <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
-                                    @if($unreadCount > 0)
+                                    @if(($unreadCount ?? 0) > 0)
                                     <form action="{{ route('notifications.mark-all-read') }}" method="POST">
                                         @csrf
                                         <button type="submit" class="text-[10px] text-blue-600 font-bold hover:underline uppercase tracking-wider">Tandai Dibaca</button>
@@ -352,7 +444,7 @@
                                     @endif
                                 </div>
                                 <div class="max-h-[400px] overflow-y-auto">
-                                    @forelse($notifications as $notification)
+                                    @forelse(($notifications ?? collect()) as $notification)
                                     <a href="{{ route('notifications.mark-as-read', $notification->id) }}" class="block px-5 py-4 hover:bg-gray-50 border-b border-gray-100 transition-colors {{ $notification->unread() ? 'bg-blue-50/30' : '' }}">
                                         <div class="flex items-start">
                                             <div class="flex-shrink-0">
@@ -378,7 +470,7 @@
                                     </div>
                                     @endforelse
                                 </div>
-                                @if($notifications->count() > 0)
+                                @if(($notifications ?? collect())->count() > 0)
                                 <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 text-center">
                                     <a href="#" class="text-xs text-tni-700 font-bold hover:text-black transition-colors uppercase tracking-widest">
                                         Lihat Semua
@@ -458,7 +550,7 @@
         </main>
         
         <!-- Footer -->
-        <footer class="bg-white border-t border-gray-200 py-4 px-6">
+        <footer class="no-print bg-white border-t border-gray-200 py-4 px-6">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="text-sm text-gray-600">
                     &copy; {{ date('Y') }} MediTrack - Sistem Antar Obat

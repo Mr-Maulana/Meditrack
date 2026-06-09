@@ -42,8 +42,12 @@
                 </a>
             @endif
 
-            <a href="{{ route('deliveries.print', $delivery) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-tni-800 text-white rounded-xl hover:bg-black transition shadow-md font-medium">
-                <i class="fas fa-print mr-2 text-gold-400"></i> Cetak Resi
+            <a href="{{ route('deliveries.print', $delivery) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white rounded-xl hover:bg-black transition shadow-md font-medium">
+                <i class="fas fa-receipt mr-2 text-gold-400"></i> Cetak Resi
+            </a>
+
+            <a href="{{ route('deliveries.print-report', $delivery) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-tni-800 text-white rounded-xl hover:bg-black transition shadow-md font-medium">
+                <i class="fas fa-print mr-2 text-gold-400"></i> Cetak Laporan Hasil Antar
             </a>
 
             <a href="{{ route('deliveries.track', $delivery) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition shadow-md font-medium">
