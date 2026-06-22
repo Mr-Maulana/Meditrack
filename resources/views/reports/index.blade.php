@@ -46,6 +46,7 @@
                             <option value="deliveries">Detail Pengantaran</option>
                             <option value="patients">Data Pasien & Penyakit</option>
                             <option value="financial">Estimasi Operasional</option>
+                            <option value="radiology">Laporan Radiologi</option>
                         </select>
                     </div>
 
@@ -124,6 +125,22 @@
                 <a href="{{ route('reports.generate', ['report_type' => 'financial', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="inline-flex items-center text-tni-800 font-bold text-sm hover:underline">
                     Lihat Laporan <i class="fas fa-arrow-right ml-2 text-xs"></i>
                 </a>
+            </div>
+
+            {{-- Radiology Report Card --}}
+            <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl transition-all group border-l-4 border-l-purple-500 md:col-span-2">
+                <div class="flex items-start gap-6">
+                    <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors shadow-inner">
+                        <i class="fas fa-x-ray"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-xl font-black text-gray-800 mb-2">Laporan Radiologi</h4>
+                        <p class="text-sm text-gray-500 leading-relaxed mb-6">Statistik pemeriksaan Rontgen, USG, Echo jantung, dan modalitas lainnya — termasuk distribusi diagnosa dan performa operator.</p>
+                        <a href="{{ route('reports.generate', ['report_type' => 'radiology', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="inline-flex items-center text-purple-600 font-bold text-sm hover:underline">
+                            Lihat Laporan <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

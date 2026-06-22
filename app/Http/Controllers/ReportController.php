@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use App\Models\Delivery;
+use App\Models\RadiologyResult;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,7 +74,7 @@ class ReportController extends Controller
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'report_type' => 'required|in:patients,deliveries,financial,summary',
+            'report_type' => 'required|in:patients,deliveries,financial,summary,radiology',
         ]);
 
         $user = Auth::user();
@@ -100,6 +101,11 @@ class ReportController extends Controller
             case 'summary':
                 $data = $this->generateSummaryReport($user, $startDate, $endDate);
                 $view = 'reports.summary';
+                break;
+
+            case 'radiology':
+                $data = $this->generateRadiologyReport($user, $startDate, $endDate);
+                $view = 'reports.radiology';
                 break;
         }
 
@@ -289,6 +295,9 @@ class ReportController extends Controller
         // Most common diagnoses
         $commonDiagnoses = $this->generatePatientReport($user, $startDate, $endDate)['diagnosisStats']->take(5);
 
+        // Radiology stats
+        $radiologyStats = $this->generateRadiologyReport($user, $startDate, $endDate)['radiologyStats'];
+
         return [
             'patientStats' => $patientStats,
             'deliveryStats' => $deliveryStats['deliveryStats'],
@@ -297,6 +306,88 @@ class ReportController extends Controller
             'topCouriers' => $topCouriers,
             'commonDiagnoses' => $commonDiagnoses,
             'dailyTrend' => $deliveryStats['dailyTrend'],
+            'radiologyStats' => $radiologyStats,
+        ];
+    }
+
+    private function generateRadiologyReport($user, $startDate, $endDate)
+    {
+        $query = RadiologyResult::with(['patient', 'operator', 'doctor'])
+            ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59']);
+
+        // Non-admin users only see their own records
+        if (!$user->isAdmin()) {
+            $query->where(function ($q) use ($user) {
+                $q->where('operator_id', $user->id)
+                  ->orWhere('doctor_id', $user->id);
+            });
+        }
+
+        $results = $query->get();
+
+        $radiologyStats = [
+            'total'     => $results->count(),
+            'pending'   => $results->where('status', 'pending')->count(),
+            'process'   => $results->where('status', 'process')->count(),
+            'completed' => $results->where('status', 'completed')->count(),
+            'sent'      => $results->whereNotNull('sent_at')->count(),
+        ];
+
+        // Completion rate
+        $completionRate = $radiologyStats['total'] > 0
+            ? round(($radiologyStats['completed'] / $radiologyStats['total']) * 100, 1)
+            : 0;
+
+        // Group by diagnosis (top 10)
+        $diagnosisTrend = $results->groupBy('diagnosis')
+            ->map(function ($group, $diagnosis) use ($results) {
+                return [
+                    'diagnosis'  => $diagnosis ?: 'Tidak Tercatat',
+                    'count'      => $group->count(),
+                    'percentage' => $results->count() > 0
+                        ? round(($group->count() / $results->count()) * 100, 1)
+                        : 0,
+                ];
+            })
+            ->sortByDesc('count')
+            ->take(10)
+            ->values();
+
+        // Daily trend
+        $dailyTrend = $results->groupBy(function ($r) {
+                return Carbon::parse($r->created_at)->format('Y-m-d');
+            })
+            ->map(function ($group, $date) {
+                return [
+                    'date'      => $date,
+                    'total'     => $group->count(),
+                    'completed' => $group->where('status', 'completed')->count(),
+                ];
+            })
+            ->sortBy('date')
+            ->values();
+
+        // Top operators
+        $operatorPerformance = $results->whereNotNull('operator_id')
+            ->groupBy('operator_id')
+            ->map(function ($group) {
+                $op = $group->first()->operator;
+                return [
+                    'name'      => $op ? $op->name : 'N/A',
+                    'total'     => $group->count(),
+                    'completed' => $group->where('status', 'completed')->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->values();
+
+        return [
+            'results'             => $results,
+            'radiologyStats'      => $radiologyStats,
+            'completionRate'      => $completionRate,
+            'diagnosisTrend'      => $diagnosisTrend,
+            'dailyTrend'          => $dailyTrend,
+            'operatorPerformance' => $operatorPerformance,
         ];
     }
 
@@ -356,6 +447,10 @@ class ReportController extends Controller
             case 'summary':
                 $reportData = $this->generateSummaryReport($user, $data['start_date'], $data['end_date']);
                 $view = 'reports.print-summary';
+                break;
+            case 'radiology':
+                $reportData = $this->generateRadiologyReport($user, $data['start_date'], $data['end_date']);
+                $view = 'reports.radiology';
                 break;
         }
 

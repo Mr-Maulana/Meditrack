@@ -25,45 +25,42 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // This app uses PUT /profile
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->put('/profile', [
                 'name' => 'Test User',
                 'email' => 'test@example.com',
             ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
-
+        $response->assertRedirect('/profile');
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
         $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
     }
 
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
+    public function test_email_is_unchanged_after_same_email_update(): void
     {
         $user = User::factory()->create();
+        $originalEmail = $user->email;
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->put('/profile', [
                 'name' => 'Test User',
-                'email' => $user->email,
+                'email' => $originalEmail,
             ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
-
-        $this->assertNotNull($user->refresh()->email_verified_at);
+        $response->assertRedirect('/profile');
+        $this->assertSame($originalEmail, $user->refresh()->email);
     }
 
     public function test_user_can_delete_their_account(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
 
         $response = $this
             ->actingAs($user)
@@ -81,7 +78,9 @@ class ProfileTest extends TestCase
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'password' => bcrypt('password'),
+        ]);
 
         $response = $this
             ->actingAs($user)

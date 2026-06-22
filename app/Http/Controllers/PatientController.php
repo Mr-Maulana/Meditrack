@@ -15,7 +15,7 @@ class PatientController extends Controller
     {
         $search = $request->get('search');
         
-        $query = Patient::when(!Auth::user()->isAdmin() && !Auth::user()->isApoteker(), function ($query) {
+        $query = Patient::when(!Auth::user()->isAdmin() && !Auth::user()->isApoteker() && !Auth::user()->isOperator() && !Auth::user()->isDokter(), function ($query) {
             return $query->where('created_by', Auth::id());
         })
         ->when($search, function($query, $search) {
@@ -42,6 +42,7 @@ class PatientController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'patient_code' => 'required|string|max:20|unique:patients,patient_code',
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:patients',
             'phone' => 'required|string|unique:patients',
@@ -55,6 +56,7 @@ class PatientController extends Controller
 
         try {
             $patient = Patient::create([
+                'patient_code' => $request->patient_code,
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
@@ -97,6 +99,7 @@ class PatientController extends Controller
         $this->authorize('update', $patient);
 
         $request->validate([
+            'patient_code' => 'required|string|max:20|unique:patients,patient_code,' . $patient->id,
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:patients,email,' . $patient->id,
             'phone' => 'required|string|unique:patients,phone,' . $patient->id,
@@ -109,7 +112,7 @@ class PatientController extends Controller
         ]);
 
         try {
-            $patient->update($request->only(['name', 'email', 'phone', 'address', 'latitude', 'longitude', 'date_of_birth', 'gender', 'medical_condition']));
+            $patient->update($request->only(['patient_code', 'name', 'email', 'phone', 'address', 'latitude', 'longitude', 'date_of_birth', 'gender', 'medical_condition']));
 
             Log::info('Patient updated', [
                 'patient_id' => $patient->id,

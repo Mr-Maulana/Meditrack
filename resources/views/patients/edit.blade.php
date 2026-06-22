@@ -38,6 +38,19 @@
                     
                     <div class="space-y-6">
                         <div>
+                            <label for="patient_code" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Nomor Rekam Medik / RM <span class="text-red-500">*</span></label>
+                            <div class="relative group">
+                                <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 group-focus-within:text-tni-600 transition-colors">
+                                    <i class="fas fa-id-card"></i>
+                                </span>
+                                <input type="text" id="patient_code" name="patient_code" value="{{ old('patient_code', $patient->patient_code) }}" required 
+                                    class="w-full pl-12 pr-6 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner"
+                                    placeholder="00251489">
+                            </div>
+                            @error('patient_code') <p class="mt-2 text-[10px] text-red-600 font-bold uppercase">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
                             <label for="name" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Nama Lengkap Pasien <span class="text-red-500">*</span></label>
                             <div class="relative group">
                                 <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 group-focus-within:text-tni-600 transition-colors">
@@ -77,6 +90,19 @@
                                     placeholder="0812xxxxxxxx">
                             </div>
                             @error('phone') <p class="mt-2 text-[10px] text-red-600 font-bold uppercase">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3 ml-1">Gmail Aktif</label>
+                            <div class="relative group">
+                                <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 group-focus-within:text-tni-600 transition-colors">
+                                    <i class="far fa-envelope"></i>
+                                </span>
+                                <input type="email" id="email" name="email" value="{{ old('email', $patient->email) }}" 
+                                    class="w-full pl-12 pr-6 py-4 bg-gray-50/50 border border-transparent rounded-2xl text-sm font-bold focus:bg-white focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-inner"
+                                    placeholder="nama.pasien@gmail.com">
+                            </div>
+                            @error('email') <p class="mt-2 text-[10px] text-red-600 font-bold uppercase">{{ $message }}</p> @enderror
                         </div>
                     </div>
                 </div>

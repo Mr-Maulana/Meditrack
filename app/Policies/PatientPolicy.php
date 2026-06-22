@@ -10,17 +10,17 @@ class PatientPolicy
 {
     public function view(User $user, Patient $patient): bool
     {
-        return $user->isAdmin() || $user->isApoteker() || $patient->created_by === $user->id;
+        return $user->isAdmin() || $user->isApoteker() || $user->isOperator() || $user->isDokter() || $patient->created_by === $user->id;
     }
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isApoteker();
+        return $user->isAdmin() || $user->isApoteker() || $user->isOperator();
     }
 
     public function update(User $user, Patient $patient): bool
     {
-        return $user->isAdmin() || $user->isApoteker() || $patient->created_by === $user->id;
+        return $user->isAdmin() || $user->isApoteker() || $user->isOperator() || $user->isDokter() || $patient->created_by === $user->id;
     }
 
     public function delete(User $user, Patient $patient): bool
@@ -30,7 +30,7 @@ class PatientPolicy
 
     public function print(User $user, Patient $patient): bool
     {
-        return $user->isAdmin() || $user->isApoteker() || $patient->created_by === $user->id;
+        return $user->isAdmin() || $user->isApoteker() || $user->isOperator() || $user->isDokter() || $patient->created_by === $user->id;
     }
 
     public function addPrescription(User $user, Patient $patient): bool

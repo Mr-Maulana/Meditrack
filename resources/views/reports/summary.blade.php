@@ -27,7 +27,7 @@
     ])
 
     <!-- Stats Overview -->
-    <div class="report-stats grid grid-cols-1 md:grid-cols-4 gap-6 print:grid-cols-4 print:gap-4">
+    <div class="report-stats grid grid-cols-1 md:grid-cols-5 gap-6 print:grid-cols-5 print:gap-4">
         <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-tni-800 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
             <div class="w-12 h-12 bg-tni-50 text-tni-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
                 <i class="fas fa-users text-xl"></i>
@@ -58,6 +58,15 @@
             </div>
             <div class="text-2xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors print:text-xl">Rp {{ number_format($estimatedRevenue, 0, ',', '.') }}</div>
             <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-blue-200 transition-colors">Efisiensi</div>
+        </div>
+
+        {{-- Radiology KPI --}}
+        <div class="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 text-center group hover:bg-purple-600 transition-all duration-300 print:shadow-none print:border-gray-300 print:p-4">
+            <div class="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-white/20 group-hover:text-white transition-colors print:hidden">
+                <i class="fas fa-x-ray text-xl"></i>
+            </div>
+            <div class="text-3xl font-black text-gray-900 mb-1 group-hover:text-white transition-colors print:text-xl">{{ $radiologyStats['total'] ?? 0 }}</div>
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-purple-200 transition-colors">Pemeriksaan Radiologi</div>
         </div>
     </div>
 
@@ -94,6 +103,14 @@
                         <td class="px-8 py-5 text-sm font-black text-center">{{ $patientStats['total'] }}</td>
                         <td class="px-8 py-5 text-sm font-bold text-center text-red-600">--%</td>
                         <td class="px-8 py-5 text-xs text-gray-500 text-right">Prioritas Tinggi</td>
+                    </tr>
+                    <tr>
+                        <td class="px-8 py-5 text-sm font-bold text-tni-900">Pemeriksaan Radiologi</td>
+                        <td class="px-8 py-5 text-sm font-black text-center">{{ $radiologyStats['total'] ?? 0 }}</td>
+                        <td class="px-8 py-5 text-sm font-bold text-center text-purple-600">
+                            {{ isset($radiologyStats['completed'], $radiologyStats['total']) && $radiologyStats['total'] > 0 ? round(($radiologyStats['completed'] / $radiologyStats['total']) * 100, 1) : 0 }}%
+                        </td>
+                        <td class="px-8 py-5 text-xs text-gray-500 text-right">Tingkat Selesai</td>
                     </tr>
                 </tbody>
             </table>

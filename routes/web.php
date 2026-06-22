@@ -156,4 +156,28 @@ Route::middleware(['auth'])->group(function () {
     // Notifications
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::get('/notifications/{id}/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+
+    // ============ RADIOLOGY ROUTES ============
+    Route::prefix('radiology')->name('radiology.')->group(function () {
+        Route::get('/', [App\Http\Controllers\RadiologyController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\RadiologyController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\RadiologyController::class, 'store'])->name('store');
+        Route::get('/{id}', [App\Http\Controllers\RadiologyController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [App\Http\Controllers\RadiologyController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [App\Http\Controllers\RadiologyController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\RadiologyController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/send/{channel}', [App\Http\Controllers\RadiologyController::class, 'send'])->name('send');
+        
+        // Chat simulator routes
+        Route::get('/chat/center', [App\Http\Controllers\RadiologyController::class, 'chatIndex'])->name('chat-center');
+        Route::get('/chat/{id}/history', [App\Http\Controllers\RadiologyController::class, 'chatShow'])->name('chat-show');
+        Route::post('/chat/{id}/send', [App\Http\Controllers\RadiologyController::class, 'chatSend'])->name('chat-send');
+        Route::post('/chat/{id}/simulate', [App\Http\Controllers\RadiologyController::class, 'simulateReply'])->name('chat-simulate');
+    });
 });
+
+// Public Radiology Report Portal
+Route::get('/report/radiology/{share_token}', [App\Http\Controllers\RadiologyController::class, 'publicReport'])
+    ->name('radiology.public-report');
+Route::get('/report/radiology/{share_token}/pdf', [App\Http\Controllers\RadiologyController::class, 'publicReportPdf'])
+    ->name('radiology.public-report.pdf');

@@ -33,13 +33,6 @@ class Patient extends Model
     {
         parent::boot();
 
-        static::creating(function ($patient) {
-            // Generate patient code if not provided
-            if (empty($patient->patient_code)) {
-                $patient->patient_code = 'PT' . date('Ymd') . str_pad(Patient::count() + 1, 4, '0', STR_PAD_LEFT);
-            }
-        });
-
         static::created(function ($patient) {
             // Create initial delivery if prescriptions exist
             if ($patient->prescriptions()->exists()) {
@@ -67,6 +60,11 @@ class Patient extends Model
     public function deliveries()
     {
         return $this->hasMany(Delivery::class);
+    }
+
+    public function radiologyResults()
+    {
+        return $this->hasMany(RadiologyResult::class);
     }
 
     public function latestDelivery()

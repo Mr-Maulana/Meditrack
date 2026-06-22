@@ -243,16 +243,6 @@
             overflow: hidden;
         }
         
-        .submenu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-        
-        .submenu.open {
-            max-height: 500px;
-        }
-        
         .submenu-item {
             padding-left: 3rem;
         }
@@ -284,13 +274,126 @@
         .leaflet-routing-alt {
             max-height: 300px !important;
         }
+
+        /* --- GLOBAL ANIMATIONS & INTERACTIVE MICRO-EFFECTS --- */
+        
+        /* Smooth Page Entry Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Scale In Animation */
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animate-scale-in {
+            animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Slide In Right Animation */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .animate-slide-in-right {
+            animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Shimmer Skeleton Loader (Lightweight) */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+            100% {
+                background-position: 200% 0;
+            }
+        }
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+
+        /* Tactile Press Interaction for Buttons & Nav Items - Click Safe */
+        button, 
+        .btn, 
+        .nav-item, 
+        .sidebar-item,
+        input[type="submit"], 
+        input[type="button"],
+        .cursor-pointer {
+            transition: opacity 0.15s ease, background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        button:active, 
+        .btn:active, 
+        .nav-item:active, 
+        input[type="submit"]:active, 
+        input[type="button"]:active {
+            opacity: 0.82;
+        }
+
+        /* Explicit scale down for non-nav, safe elements if requested */
+        .active-scale:active {
+            transform: scale(0.97);
+        }
+
+        /* Smooth Custom Scrollbar for all scrollable boxes */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.3);
+            border-radius: 999px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(156, 163, 175, 0.5);
+        }
+
+        /* Hover Cards for Dashboard and indexes */
+        .hover-card-interactive {
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hover-card-interactive:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+        }
     </style>
     
     @yield('styles')
 </head>
 <body class="bg-[#f8fafc] text-gray-800 font-sans antialiased selection:bg-tni-500 selection:text-white">
     <!-- Overlay untuk mobile -->
-    <div id="overlay" class="overlay" onclick="toggleMobileSidebar()"></div>
 
     @if(Auth::check())
     <!-- Desktop Sidebar -->
@@ -393,7 +496,7 @@
     </div>
 
     <!-- Mobile Overlay -->
-    <div class="overlay no-print fixed inset-0 bg-tni-900/60 backdrop-blur-sm z-40 hidden" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
+    <div class="no-print fixed inset-0 bg-tni-900/60 backdrop-blur-sm z-40 hidden" id="sidebarOverlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- Main Content -->
     <div class="main-content min-h-screen flex flex-col" id="mainContent">
@@ -423,7 +526,7 @@
                     <div class="flex items-center space-x-4">
                         <!-- Notifications -->
                         <div class="relative">
-                            <button type="button" onclick="toggleNotifications()" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="toggleNotifications(); event.stopPropagation();" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
                                 <i class="fas fa-bell text-xl"></i>
                                 @if(($unreadCount ?? 0) > 0)
                                 <span class="absolute top-1 right-1 w-4 h-4 bg-red-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold">
@@ -433,7 +536,7 @@
                             </button>
                             
                             <!-- Notifications Dropdown -->
-                            <div id="notificationsMenu" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-0 z-50 overflow-hidden transform transition-all">
+                            <div id="notificationsMenu" onclick="event.stopPropagation();" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 py-0 z-50 overflow-hidden transform transition-all">
                                 <div class="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
                                     <h3 class="text-sm font-bold text-gray-800">Notifikasi</h3>
                                     @if(($unreadCount ?? 0) > 0)
@@ -482,7 +585,7 @@
                         
                         <!-- User Menu -->
                         <div class="relative">
-                            <button type="button" onclick="toggleUserMenu()" class="flex items-center space-x-3 focus:outline-none p-1 rounded-lg hover:bg-gray-100 transition-colors">
+                            <button type="button" onclick="toggleUserMenu(); event.stopPropagation();" class="flex items-center space-x-3 focus:outline-none p-1 rounded-lg hover:bg-gray-100 transition-colors">
                                 <div class="w-9 h-9 bg-tni-700 rounded-full flex items-center justify-center text-gold-400 shadow border border-tni-600 font-bold overflow-hidden">
                                     @if(auth()->user()->profile_photo)
                                         <img src="{{ asset('storage/' . auth()->user()->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
@@ -497,7 +600,7 @@
                                 <i class="fas fa-chevron-down text-gray-400 text-xs ml-1"></i>
                             </button>
                             
-                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <div id="userMenu" onclick="event.stopPropagation();" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                                 <div class="px-4 py-3 border-b border-gray-200">
                                     <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
                                     <div class="text-xs text-gray-500">{{ auth()->user()->email }}</div>
@@ -523,7 +626,7 @@
         </nav>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50">
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50 animate-fade-in">
             <!-- Flash Messages -->
             @if(session('success'))
             <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
@@ -598,7 +701,7 @@
                     const overlay = document.getElementById('sidebarOverlay');
                     if (sidebar && overlay && sidebar.classList.contains('open')) {
                         sidebar.classList.remove('open');
-                        overlay.classList.remove('active');
+                        overlay.classList.add('hidden');
                         document.body.style.overflow = '';
                     }
                 });
@@ -622,10 +725,18 @@
                 sidebar.classList.add('collapsed');
                 mainContent.classList.add('expanded');
                 
-                // Automatically close all open submenus when sidebar is collapsed
-                document.querySelectorAll('.submenu.open').forEach(menu => {
-                    menu.classList.remove('open');
-                });
+                // Automatically close all open submenus in desktop sidebar when collapsed
+                const desktopSidebar = document.getElementById('desktopSidebar');
+                if (desktopSidebar) {
+                    desktopSidebar.querySelectorAll('.submenu.open').forEach(menu => {
+                        menu.classList.remove('open');
+                        const btn = menu.previousElementSibling;
+                        if (btn) {
+                            const icon = btn.querySelector('.submenu-icon');
+                            if (icon) icon.classList.remove('rotated');
+                        }
+                    });
+                }
             }
         }
         
@@ -643,7 +754,7 @@
             const overlay = document.getElementById('sidebarOverlay');
             if (sidebar && overlay) {
                 sidebar.classList.toggle('open');
-                overlay.classList.toggle('active');
+                overlay.classList.toggle('hidden');
                 document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
             }
         }
@@ -665,15 +776,12 @@
         // Close dropdowns when clicking outside
         document.addEventListener('click', function(event) {
             const userMenu = document.getElementById('userMenu');
-            const userMenuButton = document.querySelector('button[onclick="toggleUserMenu()"]');
             const notificationsMenu = document.getElementById('notificationsMenu');
-            const notificationsButton = document.querySelector('button[onclick="toggleNotifications()"]');
             
-            if (userMenu && userMenuButton && !userMenu.contains(event.target) && !userMenuButton.contains(event.target)) {
+            if (userMenu) {
                 userMenu.classList.add('hidden');
             }
-            
-            if (notificationsMenu && notificationsButton && !notificationsMenu.contains(event.target) && !notificationsButton.contains(event.target)) {
+            if (notificationsMenu) {
                 notificationsMenu.classList.add('hidden');
             }
         });
@@ -764,16 +872,8 @@
         }
         
         function highlightActiveMenu() {
-            const currentPath = window.location.pathname;
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.classList.remove('active');
-                const href = item.getAttribute('href');
-                if (href && currentPath.includes(href.replace(/^.*\/\/[^\/]+/, ''))) {
-                    item.classList.add('active');
-                }
-            });
+            // Active highlighting is handled by Blade server-side classes.
+            // This function is kept as a no-op for backward compatibility.
         }
         
         // Keyboard shortcuts
@@ -801,7 +901,7 @@
                 const overlay = document.getElementById('sidebarOverlay');
                 if (mobileSidebar && overlay) {
                     mobileSidebar.classList.remove('open');
-                    overlay.classList.remove('active');
+                    overlay.classList.add('hidden');
                     document.body.style.overflow = '';
                 }
             }
@@ -809,5 +909,6 @@
     </script>
     
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

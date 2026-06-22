@@ -64,4 +64,22 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')
             ->with('success', 'Profil berhasil diperbarui!');
     }
+
+    public function destroy(Request $request)
+    {
+        $request->validateWithBag('userDeletion', [
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        Auth::logout();
+
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
 }

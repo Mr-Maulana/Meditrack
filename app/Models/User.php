@@ -65,6 +65,16 @@ class User extends Authenticatable
         return $this->role === 'kurir';
     }
 
+    public function isOperator()
+    {
+        return $this->role === 'operator';
+    }
+
+    public function isDokter()
+    {
+        return $this->role === 'dokter';
+    }
+
     // Authorization Methods
     public function canManageUsers()
     {
@@ -73,7 +83,7 @@ class User extends Authenticatable
 
     public function canManagePatients()
     {
-        return $this->isAdmin() || $this->isApoteker();
+        return $this->isAdmin() || $this->isApoteker() || $this->isOperator();
     }
 
     public function canCreatePrescription()
@@ -89,6 +99,16 @@ class User extends Authenticatable
     public function canDeliverPackage()
     {
         return $this->isAdmin() || $this->isKurir();
+    }
+
+    public function canUploadRadiology()
+    {
+        return $this->isAdmin() || $this->isApoteker() || $this->isOperator();
+    }
+
+    public function canReadRadiology()
+    {
+        return $this->isAdmin() || $this->isDokter();
     }
 
     public function canEditProfile()

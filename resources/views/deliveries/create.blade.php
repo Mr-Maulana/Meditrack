@@ -35,7 +35,7 @@
             <!-- Left Column: Primary Selection -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Patient & Prescription Section -->
-                <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-visible">
                     <div class="bg-gradient-to-r from-tni-800 to-tni-600 p-6 text-white flex items-center">
                         <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mr-4">
                             <i class="fas fa-user-tag text-lg"></i>
@@ -49,15 +49,44 @@
                     <div class="p-8 space-y-8">
                         <!-- Patient Picker -->
                         <div>
-                            <label for="patient_id" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Data Pasien <span class="text-red-500">*</span></label>
-                            <select id="patient_id" name="patient_id" required class="w-full bg-gray-50 border-gray-200 rounded-2xl py-4 px-6 text-sm focus:ring-tni-500 focus:border-tni-500 transition-all font-medium">
-                                <option value="">Cari Nama atau Nomor Rekam Medis...</option>
-                                @foreach($patients as $patient)
-                                <option value="{{ $patient->id }}" data-address="{{ $patient->address }}">
-                                    [{{ $patient->patient_code ?? $patient->medical_record_number }}] {{ $patient->name }}
-                                </option>
-                                @endforeach
-                            </select>
+                            <label for="patientSearchInput" class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Data Pasien <span class="text-red-500">*</span></label>
+                            <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id') }}">
+
+                            <div id="patientSearchMode">
+                                <div class="relative" id="patientSearchWrapper">
+                                    <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 group-focus-within:text-tni-600 transition-colors pointer-events-none">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" id="patientSearchInput" autocomplete="off"
+                                        placeholder="Cari nama atau Nomor Rekam Medis..."
+                                        class="w-full pl-12 pr-10 py-4 bg-white border border-gray-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-tni-500/20 focus:border-tni-500 transition-all shadow-sm outline-none">
+                                    <button type="button" id="patientSearchClear" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-300 hover:text-gray-500 transition-colors hidden">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+
+                                    <div id="patientDropdown" class="hidden absolute z-50 left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden">
+                                        <div id="patientDropdownList" class="max-h-60 overflow-y-auto divide-y divide-gray-50"></div>
+                                        <div id="patientNoResult" class="hidden px-5 py-4 text-xs text-gray-400 font-bold text-center">
+                                            <i class="fas fa-search-minus mr-1 opacity-50"></i> Pasien tidak ditemukan
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="patientLockedMode" class="hidden mt-4">
+                                <div class="flex items-center gap-4 bg-white border border-tni-100 rounded-2xl p-4 shadow-sm">
+                                    <div class="w-12 h-12 bg-tni-600 rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="lockedPatientName" class="text-sm font-black text-gray-800 truncate">-</p>
+                                        <p id="lockedPatientCode" class="text-[10px] uppercase tracking-[0.2em] text-tni-600 font-bold">No. RM</p>
+                                    </div>
+                                    <button type="button" id="patientSearchReset" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Patient Quick Info (Initially Hidden) -->
@@ -83,11 +112,45 @@
 
                         <!-- Prescription Picker (Initially Hidden) -->
                         <div id="prescriptionInfo" class="hidden animate-fade-in space-y-4 pt-6 border-t border-gray-100">
-                            <label for="prescription_id" class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Resep Obat yang Akan Dikirim <span class="text-red-500">*</span></label>
-                            <select id="prescription_id" name="prescription_id" required class="w-full bg-gold-50 border-gold-200 rounded-2xl py-4 px-6 text-sm focus:ring-gold-500 focus:border-gold-500 transition-all font-bold text-gold-900">
-                                <option value="">Pilih Resep...</option>
-                            </select>
-                            
+                            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest">Resep Obat yang Akan Dikirim <span class="text-red-500">*</span></label>
+                            <input type="hidden" name="prescription_id" id="prescription_id" value="{{ old('prescription_id') }}">
+
+                            <div id="prescriptionSearchMode">
+                                <div class="relative" id="prescriptionSearchWrapper">
+                                    <span class="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 group-focus-within:text-gold-600 transition-colors pointer-events-none">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" id="prescriptionSearchInput" autocomplete="off"
+                                        placeholder="Cari resep..."
+                                        class="w-full pl-12 pr-10 py-4 bg-white border border-gray-200 rounded-2xl text-sm font-bold focus:ring-2 focus:ring-gold-500/20 focus:border-gold-500 transition-all shadow-sm outline-none">
+                                    <button type="button" id="prescriptionSearchClear" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-300 hover:text-gray-500 transition-colors hidden">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+
+                                    <div id="prescriptionDropdown" class="hidden absolute z-50 left-0 right-0 mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl overflow-hidden">
+                                        <div id="prescriptionDropdownList" class="max-h-60 overflow-y-auto divide-y divide-gray-50"></div>
+                                        <div id="prescriptionNoResult" class="hidden px-5 py-4 text-xs text-gray-400 font-bold text-center">
+                                            <i class="fas fa-search-minus mr-1 opacity-50"></i> Resep tidak ditemukan
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="prescriptionLockedMode" class="hidden mt-4">
+                                <div class="flex items-center gap-4 bg-white border border-gold-100 rounded-2xl p-4 shadow-sm">
+                                    <div class="w-12 h-12 bg-gold-500 rounded-xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg">
+                                        <i class="fas fa-file-prescription"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p id="lockedPrescriptionLabel" class="text-sm font-black text-gray-800 truncate">-</p>
+                                        <p id="lockedPrescriptionMeta" class="text-[10px] uppercase tracking-[0.2em] text-gold-600 font-bold">Resep terpilih</p>
+                                    </div>
+                                    <button type="button" id="prescriptionSearchReset" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                             <div id="prescriptionDetailsContainer" class="hidden mt-4 bg-white border-2 border-dashed border-gold-200 rounded-2xl p-6">
                                 <div id="prescriptionList" class="space-y-3">
                                     <!-- Dynamic content -->
@@ -218,83 +281,384 @@
     let map, marker, selectedLatLng;
     const patients = @json($patients->keyBy('id'));
 
-    document.getElementById('patient_id').addEventListener('change', function() {
-        const p = patients[this.value];
-        if (p) {
-            document.getElementById('selectedPatientName').textContent = p.name;
-            document.getElementById('selectedPatientPhone').textContent = p.phone;
-            document.getElementById('selectedPatientAddress').textContent = p.address;
-            document.getElementById('delivery_address').value = p.address;
-            document.getElementById('patientInfo').classList.remove('hidden');
+    const patientSearchInput = document.getElementById('patientSearchInput');
+    const patientSearchClear = document.getElementById('patientSearchClear');
+    const patientDropdown = document.getElementById('patientDropdown');
+    const patientDropdownList = document.getElementById('patientDropdownList');
+    const patientNoResult = document.getElementById('patientNoResult');
+    const hiddenPatientId = document.getElementById('patient_id');
+    const patientSearchMode = document.getElementById('patientSearchMode');
+    const patientLockedMode = document.getElementById('patientLockedMode');
+    const lockedPatientName = document.getElementById('lockedPatientName');
+    const lockedPatientCode = document.getElementById('lockedPatientCode');
+    const patientSearchReset = document.getElementById('patientSearchReset');
 
-            // Handle Prescriptions
-            const sel = document.getElementById('prescription_id');
-            const cont = document.getElementById('prescriptionInfo');
-            sel.innerHTML = '<option value="">Pilih Resep...</option>';
-            
-            if (p.prescriptions && p.prescriptions.length > 0) {
-                p.prescriptions.forEach(pr => {
-                    const opt = document.createElement('option');
-                    opt.value = pr.id;
-                    const dateObj = new Date(pr.created_at);
-                    const formattedDate = dateObj.toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'});
-                    opt.textContent = `Resep - ${formattedDate}`;
-                    sel.appendChild(opt);
-                });
-                cont.classList.remove('hidden');
-                
-                sel.onchange = function() {
-                    const detailCont = document.getElementById('prescriptionDetailsContainer');
-                    const list = document.getElementById('prescriptionList');
-                    list.innerHTML = '';
-                    const pr = p.prescriptions.find(x => x.id == this.value);
-                    if (pr) {
-                        const meds = pr.medications || [
-                            {
-                                name: pr.medication_name,
-                                dosage: pr.dosage,
-                                frequency: pr.frequency,
-                                instructions: pr.instructions
-                            }
-                        ];
+    const prescriptionSearchInput = document.getElementById('prescriptionSearchInput');
+    const prescriptionSearchClear = document.getElementById('prescriptionSearchClear');
+    const prescriptionDropdown = document.getElementById('prescriptionDropdown');
+    const prescriptionDropdownList = document.getElementById('prescriptionDropdownList');
+    const prescriptionNoResult = document.getElementById('prescriptionNoResult');
+    const hiddenPrescriptionId = document.getElementById('prescription_id');
+    const prescriptionSearchMode = document.getElementById('prescriptionSearchMode');
+    const prescriptionLockedMode = document.getElementById('prescriptionLockedMode');
+    const lockedPrescriptionLabel = document.getElementById('lockedPrescriptionLabel');
+    const lockedPrescriptionMeta = document.getElementById('lockedPrescriptionMeta');
+    const prescriptionSearchReset = document.getElementById('prescriptionSearchReset');
 
-                        let medsHtml = '';
-                        meds.forEach((med, i) => {
-                            medsHtml += `
-                                <div class="bg-white p-4 rounded-2xl border border-gold-100 shadow-sm ${i > 0 ? 'mt-3' : ''}">
-                                    <div class="font-bold text-gold-700 text-sm mb-2 flex items-center">
-                                        <span class="w-5 h-5 bg-gold-500 text-white text-[10px] rounded-full flex items-center justify-center mr-2">${i+1}</span>
-                                        ${med.name}
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-2 text-[10px]">
-                                        <div class="bg-gold-50 p-2 rounded-lg text-gold-800"><strong>DOSIS:</strong> ${med.dosage}</div>
-                                        <div class="bg-gold-50 p-2 rounded-lg text-gold-800"><strong>FREKUENSI:</strong> ${med.frequency}</div>
-                                    </div>
-                                    ${med.instructions ? `<div class="mt-2 text-[10px] italic text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">"${med.instructions}"</div>` : ''}
-                                </div>
-                            `;
-                        });
+    function formatPatientOption(patient, q) {
+        const code = patient.patient_code || patient.medical_record_number || 'RM-?';
+        return `
+            <button type="button" class="w-full text-left px-5 py-3.5 hover:bg-tni-50 transition-colors flex items-center gap-3 group">
+                <div class="w-11 h-11 bg-gray-100 group-hover:bg-tni-600 text-gray-400 group-hover:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                    <i class="fas fa-user text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-gray-800 truncate">${highlightMatch(`[${code}] ${patient.name}`, q)}</p>
+                    <p class="text-[10px] text-gray-400 font-bold">${highlightMatch(code, q)}</p>
+                </div>
+            </button>
+        `;
+    }
 
-                        list.innerHTML = medsHtml;
-                        detailCont.classList.remove('hidden');
-                    } else {
-                        detailCont.classList.add('hidden');
-                    }
-                };
+    function formatPrescriptionOption(prescription, q) {
+        const code = `Resep - ${new Date(prescription.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}`;
+        return `
+            <button type="button" class="w-full text-left px-5 py-3.5 hover:bg-gold-50 transition-colors flex items-center gap-3 group">
+                <div class="w-11 h-11 bg-gold-100 group-hover:bg-gold-500 text-gold-600 group-hover:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                    <i class="fas fa-file-prescription text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-gray-800 truncate">${highlightMatch(code, q)}</p>
+                    <p class="text-[10px] text-gray-500">${prescription.notes ? prescription.notes : 'Tidak ada catatan'}</p>
+                </div>
+            </button>
+        `;
+    }
 
-                if (p.prescriptions.length === 1) {
-                    sel.value = p.prescriptions[0].id;
-                    sel.dispatchEvent(new Event('change'));
-                }
-            } else {
-                sel.innerHTML = '<option value="">Tidak ada resep aktif</option>';
-                cont.classList.remove('hidden');
+    function filterPatients(query) {
+        const value = query.trim().toLowerCase();
+        if (!value) {
+            return Object.values(patients);
+        }
+
+        return Object.values(patients).filter(patient => {
+            return patient.name.toLowerCase().includes(value)
+                || (patient.patient_code || '').toLowerCase().includes(value)
+                || (patient.medical_record_number || '').toLowerCase().includes(value);
+        });
+    }
+
+    function filterPrescriptions(query, prescriptions) {
+        const value = query.trim().toLowerCase();
+        if (!value) {
+            return prescriptions;
+        }
+
+        return prescriptions.filter(pr => {
+            const label = `Resep - ${new Date(pr.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}`.toLowerCase();
+            return label.includes(value) || (pr.notes || '').toLowerCase().includes(value);
+        });
+    }
+
+    function highlightMatch(text, q) {
+        if (!q) return text;
+        const idx = text.toLowerCase().indexOf(q);
+        if (idx === -1) return text;
+        return text.substring(0, idx)
+            + `<mark class="bg-gold-200 text-tni-900 rounded px-0.5">${text.substring(idx, idx + q.length)}</mark>`
+            + text.substring(idx + q.length);
+    }
+
+    function renderDropdown(results, q) {
+        patientDropdownList.innerHTML = '';
+        patientNoResult.classList.add('hidden');
+        patientDropdown.classList.remove('hidden');
+
+        if (!results.length) {
+            patientNoResult.classList.remove('hidden');
+            return;
+        }
+
+        results.forEach(patient => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'w-full text-left px-5 py-3.5 hover:bg-tni-50 transition-colors flex items-center gap-3 group';
+            item.innerHTML = `
+                <div class="w-11 h-11 bg-gray-100 group-hover:bg-tni-600 text-gray-400 group-hover:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                    <i class="fas fa-user text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-gray-800 truncate">${highlightMatch(`[${patient.patient_code || patient.medical_record_number || 'RM-?'}] ${patient.name}`, q)}</p>
+                    <p class="text-[10px] text-gray-400 font-bold">${highlightMatch(patient.patient_code || patient.medical_record_number || 'RM-?', q)}</p>
+                </div>
+            `;
+            item.addEventListener('click', () => selectPatient(patient));
+            patientDropdownList.appendChild(item);
+        });
+    }
+
+    function showPatientDropdown(results, q) {
+        patientDropdownList.innerHTML = '';
+        if (!results.length) {
+            patientNoResult.classList.remove('hidden');
+            patientDropdown.classList.remove('hidden');
+            return;
+        }
+
+        patientNoResult.classList.add('hidden');
+        patientDropdown.classList.remove('hidden');
+        renderDropdown(results, q);
+    }
+
+    function selectPatient(p) {
+        if (!p) return;
+
+        const previousPrescriptionId = hiddenPrescriptionId.value;
+        hiddenPatientId.value = p.id;
+        patientSearchClear.classList.remove('hidden');
+        hideDropdown();
+        lockPatient(p);
+        patientSearchInput.value = '';
+        prescriptionSearchInput.value = '';
+        prescriptionSearchClear.classList.add('hidden');
+        prescriptionSearchMode.classList.remove('hidden');
+        prescriptionLockedMode.classList.add('hidden');
+        hiddenPrescriptionId.value = '';
+
+        document.getElementById('selectedPatientName').textContent = p.name;
+        document.getElementById('selectedPatientPhone').textContent = p.phone;
+        document.getElementById('selectedPatientAddress').textContent = p.address;
+        document.getElementById('delivery_address').value = p.address;
+        document.getElementById('patientInfo').classList.remove('hidden');
+
+        const cont = document.getElementById('prescriptionInfo');
+        cont.classList.remove('hidden');
+
+        if (p.prescriptions && p.prescriptions.length === 1) {
+            selectPrescription(p.prescriptions[0]);
+        } else if (previousPrescriptionId) {
+            const persisted = p.prescriptions && p.prescriptions.find(x => x.id == previousPrescriptionId);
+            if (persisted) {
+                selectPrescription(persisted);
             }
+        }
+    }
+
+    function handlePrescriptionSelection() {
+        const detailCont = document.getElementById('prescriptionDetailsContainer');
+        const list = document.getElementById('prescriptionList');
+        list.innerHTML = '';
+        const patientId = hiddenPatientId.value;
+        const p = patients[patientId];
+        const prescriptionId = hiddenPrescriptionId.value;
+
+        if (!p || !prescriptionId) {
+            detailCont.classList.add('hidden');
+            return;
+        }
+
+        const pr = p.prescriptions.find(x => x.id == prescriptionId);
+        if (pr) {
+            const meds = pr.medications || [
+                {
+                    name: pr.medication_name,
+                    dosage: pr.dosage,
+                    frequency: pr.frequency,
+                    instructions: pr.instructions
+                }
+            ];
+            let medsHtml = '';
+            meds.forEach((med, i) => {
+                medsHtml += `
+                    <div class="bg-white p-4 rounded-2xl border border-gold-100 shadow-sm ${i > 0 ? 'mt-3' : ''}">
+                        <div class="font-bold text-gold-700 text-sm mb-2 flex items-center">
+                            <span class="w-5 h-5 bg-gold-500 text-white text-[10px] rounded-full flex items-center justify-center mr-2">${i+1}</span>
+                            ${med.name}
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-[10px]">
+                            <div class="bg-gold-50 p-2 rounded-lg text-gold-800"><strong>DOSIS:</strong> ${med.dosage}</div>
+                            <div class="bg-gold-50 p-2 rounded-lg text-gold-800"><strong>FREKUENSI:</strong> ${med.frequency}</div>
+                        </div>
+                        ${med.instructions ? `<div class="mt-2 text-[10px] italic text-gray-500 bg-gray-50 p-2 rounded-lg border border-gray-100">"${med.instructions}"</div>` : ''}
+                    </div>
+                `;
+            });
+            list.innerHTML = medsHtml;
+            detailCont.classList.remove('hidden');
         } else {
-            document.getElementById('patientInfo').classList.add('hidden');
-            document.getElementById('prescriptionInfo').classList.add('hidden');
+            detailCont.classList.add('hidden');
+        }
+    }
+
+    function lockPatient(p) {
+        lockedPatientName.textContent = p.name;
+        lockedPatientCode.textContent = 'No. RM: ' + (p.patient_code || p.medical_record_number || 'RM-?');
+        patientSearchMode.classList.add('hidden');
+        patientLockedMode.classList.remove('hidden');
+    }
+
+    function clearPatientSearch() {
+        hiddenPatientId.value = '';
+        hiddenPrescriptionId.value = '';
+        patientSearchInput.value = '';
+        prescriptionSearchInput.value = '';
+        patientSearchClear.classList.add('hidden');
+        prescriptionSearchClear.classList.add('hidden');
+        hideDropdown();
+        hidePrescriptionDropdown();
+        patientLockedMode.classList.add('hidden');
+        prescriptionLockedMode.classList.add('hidden');
+        patientSearchMode.classList.remove('hidden');
+        prescriptionSearchMode.classList.remove('hidden');
+        document.getElementById('patientInfo').classList.add('hidden');
+        document.getElementById('prescriptionInfo').classList.add('hidden');
+        document.getElementById('prescriptionDetailsContainer').classList.add('hidden');
+        patientSearchInput.focus();
+    }
+
+    function clearTyping() {
+        patientSearchInput.value = '';
+        patientSearchClear.classList.add('hidden');
+        hideDropdown();
+        patientSearchInput.focus();
+    }
+
+    function hideDropdown() {
+        patientDropdown.classList.add('hidden');
+        patientDropdownList.innerHTML = '';
+        patientNoResult.classList.add('hidden');
+    }
+
+    function showPrescriptionDropdown(results, q) {
+        prescriptionDropdownList.innerHTML = '';
+        prescriptionNoResult.classList.add('hidden');
+        prescriptionDropdown.classList.remove('hidden');
+
+        if (!results.length) {
+            prescriptionNoResult.classList.remove('hidden');
+            return;
+        }
+
+        results.forEach(pr => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'w-full text-left px-5 py-3.5 hover:bg-gold-50 transition-colors flex items-center gap-3 group';
+            const label = `Resep - ${new Date(pr.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}`;
+            item.innerHTML = `
+                <div class="w-11 h-11 bg-gold-100 group-hover:bg-gold-500 text-gold-600 group-hover:text-white rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                    <i class="fas fa-file-prescription text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-black text-gray-800 truncate">${highlightMatch(label, q)}</p>
+                    <p class="text-[10px] text-gray-500">${pr.notes ? pr.notes : 'Tidak ada catatan'}</p>
+                </div>
+            `;
+            item.addEventListener('click', () => selectPrescription(pr));
+            prescriptionDropdownList.appendChild(item);
+        });
+    }
+
+    function selectPrescription(pr) {
+        if (!pr) return;
+        hiddenPrescriptionId.value = pr.id;
+        prescriptionSearchInput.value = `Resep - ${new Date(pr.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}`;
+        prescriptionSearchClear.classList.remove('hidden');
+        lockPrescription(pr);
+        handlePrescriptionSelection();
+        hidePrescriptionDropdown();
+    }
+
+    function lockPrescription(pr) {
+        lockedPrescriptionLabel.textContent = `Resep - ${new Date(pr.created_at).toLocaleDateString('id-ID', {day: '2-digit', month: 'long', year: 'numeric'})}`;
+        lockedPrescriptionMeta.textContent = pr.notes ? pr.notes : 'Resep terpilih';
+        prescriptionSearchMode.classList.add('hidden');
+        prescriptionLockedMode.classList.remove('hidden');
+    }
+
+    function clearPrescriptionSearch() {
+        hiddenPrescriptionId.value = '';
+        prescriptionSearchInput.value = '';
+        prescriptionSearchClear.classList.add('hidden');
+        hidePrescriptionDropdown();
+        prescriptionLockedMode.classList.add('hidden');
+        prescriptionSearchMode.classList.remove('hidden');
+        document.getElementById('prescriptionDetailsContainer').classList.add('hidden');
+        prescriptionSearchInput.focus();
+    }
+
+    function clearPrescriptionTyping() {
+        prescriptionSearchInput.value = '';
+        prescriptionSearchClear.classList.add('hidden');
+        hidePrescriptionDropdown();
+        prescriptionSearchInput.focus();
+    }
+
+    function hidePrescriptionDropdown() {
+        prescriptionDropdown.classList.add('hidden');
+        prescriptionDropdownList.innerHTML = '';
+        prescriptionNoResult.classList.add('hidden');
+    }
+
+    patientSearchInput.addEventListener('input', function() {
+        const results = filterPatients(this.value);
+        showPatientDropdown(results, this.value);
+        patientSearchClear.classList.toggle('hidden', !this.value.trim());
+    });
+
+    patientSearchInput.addEventListener('focus', function() {
+        const results = filterPatients(this.value);
+        if (results.length) {
+            showPatientDropdown(results, this.value);
         }
     });
+
+    patientSearchClear.addEventListener('click', function() {
+        clearTyping();
+    });
+
+    patientSearchReset.addEventListener('click', function() {
+        clearPatientSearch();
+    });
+
+    prescriptionSearchInput.addEventListener('input', function() {
+        const p = patients[hiddenPatientId.value];
+        if (!p) return;
+        const results = filterPrescriptions(this.value, p.prescriptions || []);
+        showPrescriptionDropdown(results, this.value);
+        prescriptionSearchClear.classList.toggle('hidden', !this.value.trim());
+    });
+
+    prescriptionSearchInput.addEventListener('focus', function() {
+        const p = patients[hiddenPatientId.value];
+        if (!p) return;
+        const results = filterPrescriptions(this.value, p.prescriptions || []);
+        if (results.length) {
+            showPrescriptionDropdown(results, this.value);
+        }
+    });
+
+    prescriptionSearchClear.addEventListener('click', function() {
+        clearPrescriptionTyping();
+    });
+
+    prescriptionSearchReset.addEventListener('click', function() {
+        clearPrescriptionSearch();
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('#patientSearchWrapper') && !event.target.closest('#patientDropdown')
+            && !event.target.closest('#prescriptionSearchWrapper') && !event.target.closest('#prescriptionDropdown')) {
+            hideDropdown();
+            hidePrescriptionDropdown();
+        }
+    });
+
+    @if(old('patient_id'))
+        const persistedPatient = patients['{{ old('patient_id') }}'];
+        if (persistedPatient) {
+            selectPatient(persistedPatient);
+        }
+    @endif
 
     function openMapModal() {
         document.getElementById('mapModal').classList.remove('hidden');

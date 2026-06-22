@@ -85,6 +85,61 @@
         </div>
     </div>
 
+    @if(auth()->user()->isAdmin() || auth()->user()->isApoteker() || auth()->user()->isDokter() || auth()->user()->isOperator())
+    <!-- Radiology Stats Cards -->
+    <div class="space-y-4 animate-fade-in">
+        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center">
+            <i class="fas fa-x-ray mr-2 text-tni-600"></i> Ringkasan Radiologi
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Total Radiology Scans -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 mb-1 group-hover:text-tni-600 transition-colors">Total Berkas Scan</p>
+                        <p class="text-3xl font-extrabold text-gray-900">{{ $stats['total_radiology'] }}</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-folder-open text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Diagnosis -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 mb-1 group-hover:text-amber-600 transition-colors">Menunggu Ekspertise Dokter</p>
+                        <p class="text-3xl font-extrabold text-gray-900">{{ $stats['pending_radiology'] }}</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 relative">
+                        <i class="fas fa-stethoscope text-2xl"></i>
+                        @if($stats['pending_radiology'] > 0)
+                            <span class="absolute top-0 right-0 flex h-3 w-3">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Scan Reports -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 mb-1 group-hover:text-emerald-600 transition-colors">Ekspertise Selesai</p>
+                        <p class="text-3xl font-extrabold text-gray-900">{{ $stats['completed_radiology'] }}</p>
+                    </div>
+                    <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-300">
+                        <i class="fas fa-file-alt text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Quick Actions -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-100 bg-gray-50/50">
@@ -154,6 +209,34 @@
                         </div>
                         <i class="fas fa-chevron-right text-gray-400"></i>
                     </a>
+
+                    <!-- Upload Scan Baru -->
+                    <a href="{{ route('radiology.create') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-300 hover:shadow-md transition">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-sky-100 text-sky-600 mr-3">
+                                <i class="fas fa-x-ray text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Upload Scan Baru</p>
+                                <p class="text-xs text-gray-500">Unggah hasil rontgen/USG baru</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+
+                    <!-- Hasil Radiologi -->
+                    <a href="{{ route('radiology.index') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md transition">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                                <i class="fas fa-stethoscope text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Hasil Radiologi</p>
+                                <p class="text-xs text-gray-500">Diagnosa & kelola hasil scan</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
                 @endif
 
                 <!-- Apoteker Actions -->
@@ -213,6 +296,34 @@
                         </div>
                         <i class="fas fa-chevron-right text-gray-400"></i>
                     </a>
+
+                    <!-- Upload Scan Baru -->
+                    <a href="{{ route('radiology.create') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-300 hover:shadow-md transition">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-sky-100 text-sky-600 mr-3">
+                                <i class="fas fa-x-ray text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Upload Scan Baru</p>
+                                <p class="text-xs text-gray-500">Unggah hasil rontgen/USG baru</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+
+                    <!-- Hasil Radiologi -->
+                    <a href="{{ route('radiology.index') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md transition">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                                <i class="fas fa-list text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Daftar Hasil Radiologi</p>
+                                <p class="text-xs text-gray-500">Daftar pemeriksaan scan</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
                 @endif
 
                 <!-- Kurir Actions -->
@@ -240,6 +351,96 @@
                             <div>
                                 <p class="font-medium text-gray-900">Riwayat Pengantaran</p>
                                 <p class="text-xs text-gray-500">Lihat pengantaran saya</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                @endif
+
+                <!-- Dokter Actions -->
+                @if(auth()->user()->isDokter())
+                    <!-- Diagnosa & Ekspertise -->
+                    <a href="{{ route('radiology.index') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                                <i class="fas fa-stethoscope text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Ekspertise Radiologi</p>
+                                <p class="text-xs text-gray-500">Tulis diagnosa & hasil baca scan</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    
+                    <!-- Chat Pasien -->
+                    <a href="{{ route('radiology.chat-center') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-emerald-100 text-emerald-600 mr-3">
+                                <i class="fas fa-comments text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Simulasi Chat Pasien</p>
+                                <p class="text-xs text-gray-500">Komunikasi hasil scan dengan pasien</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+
+                    <!-- Edit Profile -->
+                    <a href="{{ route('profile.edit') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-3">
+                                <i class="fas fa-user-edit text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Edit Profil</p>
+                                <p class="text-xs text-gray-500">Kelola info akun Anda</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                @endif
+
+                <!-- Operator Actions -->
+                @if(auth()->user()->isOperator())
+                    <!-- Upload Scan Baru -->
+                    <a href="{{ route('radiology.create') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-sky-50 hover:border-sky-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-sky-100 text-sky-600 mr-3">
+                                <i class="fas fa-x-ray text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Upload Scan Baru</p>
+                                <p class="text-xs text-gray-500">Unggah hasil rontgen/USG baru</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    
+                    <!-- Hasil Radiologi -->
+                    <a href="{{ route('radiology.index') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-3">
+                                <i class="fas fa-list text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Daftar Hasil Radiologi</p>
+                                <p class="text-xs text-gray-500">Kelola dan lihat status berkas scan</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+
+                    <!-- Chat Pasien -->
+                    <a href="{{ route('radiology.chat-center') }}" class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md transition animate-fade-in">
+                        <div class="flex items-center">
+                            <div class="p-3 rounded-full bg-emerald-100 text-emerald-600 mr-3">
+                                <i class="fas fa-comments text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">Simulasi Chat Pasien</p>
+                                <p class="text-xs text-gray-500">Tanya jawab hasil dengan pasien</p>
                             </div>
                         </div>
                         <i class="fas fa-chevron-right text-gray-400"></i>

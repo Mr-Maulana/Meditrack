@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Delivery;
 use App\Models\Patient;
 use App\Models\User;
+use App\Models\RadiologyResult;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
@@ -16,7 +17,7 @@ class DashboardController extends Controller
         $today = now()->format('Y-m-d');
 
         if ($user->isAdmin() || $user->isApoteker()) {
-            $patients = Patient::select(['id', 'name', 'patient_code', 'phone', 'created_by', 'created_at'])
+            $patients = Patient::select(['id', 'name', 'patient_code', 'phone', 'gender', 'created_by', 'created_at'])
                 ->with('creator:id,name')
                 ->latest()
                 ->take(5)
@@ -70,11 +71,23 @@ class DashboardController extends Controller
                 )
                 ->first();
 
+            // Fetch Radiology Stats
+            $radiologyStats = RadiologyResult::selectRaw(
+                'COUNT(*) as total_count,
+                 SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_count,
+                 SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed_count'
+            )->first();
+
             return [
                 'total_patients' => $patientQuery->count(),
                 'today_deliveries' => (int) ($deliveryStats->today_deliveries ?? 0),
                 'pending_deliveries' => (int) ($deliveryStats->pending_deliveries ?? 0),
                 'delivered_count' => (int) ($deliveryStats->delivered_count ?? 0),
+                
+                // Radiology counts
+                'total_radiology' => (int) ($radiologyStats->total_count ?? 0),
+                'pending_radiology' => (int) ($radiologyStats->pending_count ?? 0),
+                'completed_radiology' => (int) ($radiologyStats->completed_count ?? 0),
             ];
         });
     }
